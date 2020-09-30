@@ -14,7 +14,7 @@
  var pinzaDer, pinzaIzq, geometryPinza, pinzasRobot
 
  //variables camara
- var r = t = 30
+ var r = t = 50
  var l = b = -r;
  var cameraControler;
  var planta;
