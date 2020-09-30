@@ -242,7 +242,7 @@ function setCameras(ar){
 
    // pieDeBrazo.add( new THREE.AxisHelper(60));
    // nexo.add(new THREE.AxisHelper(30))
-   scene.add( new THREE.AxisHelper(100));
+   //scene.add( new THREE.AxisHelper(100));
    //nexo.add(new THREE.AxisHelper(100))
    //nexo.add(esfera);
    antebrazoRobot.add(new THREE.AxisHelper(100))

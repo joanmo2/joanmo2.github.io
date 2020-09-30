@@ -211,7 +211,7 @@
    scene.add( new THREE.AxisHelper(100));
    //nexo.add(new THREE.AxisHelper(100))
    //nexo.add(esfera);
-   antebrazoRobot.add(new THREE.AxisHelper(100))
+   //antebrazoRobot.add(new THREE.AxisHelper(100))
 
  }
 
