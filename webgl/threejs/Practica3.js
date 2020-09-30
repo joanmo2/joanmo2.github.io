@@ -27,9 +27,9 @@ function setCameras(ar){
     origen = new THREE.Vector3(0,0,0)
 
     if(ar>1){
-        planta = new THREE.OrthographicCamera(l*ar, r*ar, t, b, -20, 20);
+        planta = new THREE.OrthographicCamera(l*ar, r*ar, t, b, -20, 300);
     }else{
-        planta = new THREE.OrthographicCamera(l, r, t/ar, b/ar, -20, 20);
+        planta = new THREE.OrthographicCamera(l, r, t/ar, b/ar, -20, 300);
     }
     planta.position.set(0,200,0);
     planta.lookAt(origen);
@@ -253,21 +253,21 @@ function setCameras(ar){
     renderer.setSize(window.innerWidth,window.innerHeight)
 
     var ar = window.innerWidth/window.innerHeight;
-    if(ar>1){
-        planta.left = l * ar;
-        planta.right = r * ar;
-        planta.bottom = b;
-        planta.top = t;
-    }else{
-        planta.left = l;
-        planta.right = r;
-        planta.bottom = b/ar;
-        planta.top = t/ar;
-    }
+    // if(ar>1){
+    //     planta.left = l * ar;
+    //     planta.right = r * ar;
+    //     planta.bottom = b;
+    //     planta.top = t;
+    // }else{
+    //     planta.left = l;
+    //     planta.right = r;
+    //     planta.bottom = b/ar;
+    //     planta.top = t/ar;
+    // }
 
     camera.aspect = ar;
     camera.updateProjectionMatrix();
-    planta.updateProjectionMatrix();
+    //planta.updateProjectionMatrix();
 
  }
 
@@ -282,12 +282,13 @@ function setCameras(ar){
 
     renderer.clear()
 
-    renderer.setViewport(0,0,innerWidth, innerHeight, camera)
+    renderer.setViewport(0,0,innerWidth, innerHeight)
     renderer.render(scene, camera);
+
     if(innerHeight < innerWidth){
-        renderer.setViewport(0,0,innerHeight/4, innerHeight/4, planta)
+        renderer.setViewport(0,0,innerHeight/4, innerHeight/4)
     }else{
-        renderer.setViewport(0,0,innerWidth/4, innerWidth/4, planta)
+        renderer.setViewport(0,0,innerWidth/4, innerWidth/4)
     }
     renderer.render(scene,planta)
  }
