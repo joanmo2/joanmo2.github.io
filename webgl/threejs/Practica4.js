@@ -253,8 +253,9 @@ function setCameras(ar){
 
    // pieDeBrazo.add( new THREE.AxisHelper(60));
    // nexo.add(new THREE.AxisHelper(30))
-   //scene.add( new THREE.AxisHelper(100));
-   cabezaAntebrazo.add(new THREE.AxisHelper(100))
+   scene.add( new THREE.AxisHelper(500));
+   base.add(new THREE.AxisHelper(100))
+   //cabezaAntebrazo.add(new THREE.AxisHelper(100))
    //nexo.add(esfera);
    //antebrazoRobot.add(new THREE.AxisHelper(100))
 
@@ -262,10 +263,10 @@ function setCameras(ar){
    renderer.domElement.setAttribute("tabIndex", "0");
    renderer.domElement.focus();  
    keyboard.domElement.addEventListener('keydown', function(event){
-       if( keyboard.pressed('up'))	base.position.x += 10
-       if( keyboard.pressed('down'))	base.position.x -= 10
-       if( keyboard.pressed('left'))	base.position.z += 10
-       if( keyboard.pressed('down'))	base.position.z -= 10
+       if( keyboard.pressed('up'))	base.position.x -= 10
+       if( keyboard.pressed('down'))	base.position.x += 10
+       if( keyboard.pressed('left'))	base.position.y -= 10
+       if( keyboard.pressed('right'))	base.position.y += 10
    })
 
  }
