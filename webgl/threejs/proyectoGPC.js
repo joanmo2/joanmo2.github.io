@@ -16,6 +16,7 @@
 
  //Var eje palanca
  var ejePalancaDer,pointToRotateAround;
+ var rotacionPalanca = Math.PI * 0.23;
 
  //Objetos y variables de tiempo
  var antes = Date.now();
@@ -102,143 +103,233 @@ function setCameras(ar){
 
 
 
- function loadScene(){
+  function loadScene(){
     //Materiales
     var material = new THREE.MeshBasicMaterial({color:'red', wireframe:true});
 
    // Geometrias 
-   var geoplano = new THREE.PlaneGeometry(500, 700, 20, 20);
-   var geoesfera = new THREE.SphereGeometry(8,8,10);
-   var geopalancaround = createBoxWithRoundedEdges( 75, 8, 20, 3, 1 )
-   var geocilindro = new THREE.CylinderBufferGeometry( 40, 40, 20, 32 );
-   var geocilindroBolardo = new THREE.CylinderBufferGeometry( 10, 10, 20, 20 );
-   var georebotelargo = createBoxWithRoundedEdges( 100, 8, 20, 3, 1 )
-   var georebotecorto = createBoxWithRoundedEdges(70, 8, 20,3, 1)
-   var geotopepista = new THREE.SphereGeometry( 250, 12, 7, 0, Math.PI);
-
+    var geoplano = new THREE.PlaneGeometry(500, 700, 20, 20);
+    var geopared = new THREE.PlaneGeometry(100, 350, 20, 20);
+    var geoesfera = new THREE.SphereGeometry(8,8,10);
+    var geopalancaround = createBoxWithRoundedEdges( 60, 8, 20, 3, 1 )
+    var geocilindro = new THREE.CylinderBufferGeometry( 40, 40, 20, 32 );
+    var geocilindroBolardo = new THREE.CylinderBufferGeometry( 10, 10, 20, 20 );
+    var georebotelargo = createBoxWithRoundedEdges( 100, 8, 20, 3, 1 )
+    var georebotecorto = createBoxWithRoundedEdges(70, 8, 20,3, 1)
+    var geocilindrofondo = new THREE.CylinderBufferGeometry( 20, 20, 20, 32 );
+    var georebotepalanca = createBoxWithRoundedEdges( 85, 8, 20, 3, 1 )
+    var geoparedcubrepalanca = createBoxWithRoundedEdges( 100, 8, 20, 3, 1 )
 
    //Objetos
-   var plano = new THREE.Mesh(geoplano, material);
-   plano.rotation.x = -Math.PI * 0.25;
+    var plano = new THREE.Mesh(geoplano, material);
+    plano.rotation.x = -Math.PI * 0.25;
 
-   var bola = new THREE.Mesh(geoesfera,material)
+    var bola = new THREE.Mesh(geoesfera,material)
 
-   
-   var palancaIzq = new THREE.Mesh(geopalancaround,material)
-   palancaIzq.position.x += 19;
-   palancaIzq.position.y -= 18;
-   palancaIzq.position.z += 10;
-   palancaIzq.rotation.z -= Math.PI * 0.25;
+    //Palancas
+    var palancaIzq = new THREE.Mesh(geopalancaround,material)
+    palancaIzq.position.x += 19;
+    palancaIzq.position.y -= 18;
+    palancaIzq.position.z += 10;
+    palancaIzq.rotation.z -= rotacionPalanca;
 
-   var palancaDer = new THREE.Mesh(geopalancaround,material)
-   palancaDer.position.x -= 19;
-   palancaDer.position.y -= 18;
-   palancaDer.position.z += 10;
-   palancaDer.rotation.z += Math.PI * 0.25;
-   
-   //Ejes sobre los que pivotan las palancas
-   ejePalancaDer = new THREE.Object3D();
-   ejePalancaDer.position.set(74,-182,0)
-   ejePalancaDer.add(palancaDer)
+    var palancaDer = new THREE.Mesh(geopalancaround,material)
+    palancaDer.position.x -= 19;
+    palancaDer.position.y -= 18;
+    palancaDer.position.z += 10;
+    palancaDer.rotation.z += rotacionPalanca;
+    
+    //Ejes sobre los que pivotan las palancas
+    ejePalancaDer = new THREE.Object3D();
+    ejePalancaDer.position.set(65,-182,0)
+    ejePalancaDer.add(palancaDer)
 
-   ejePalancaIzq = new THREE.Object3D();
-   ejePalancaIzq.position.set(-74,-182,0)
-   ejePalancaIzq.add(palancaIzq)
+    ejePalancaIzq = new THREE.Object3D();
+    ejePalancaIzq.position.set(-65,-182,0)
+    ejePalancaIzq.add(palancaIzq)
 
-   var estrellaCentral = new THREE.Mesh(geocilindro,material)
-   estrellaCentral.rotation.x += Math.PI * 0.5;
-   estrellaCentral.position.z += 10
+    var estrellaCentral = new THREE.Mesh(geocilindro,material)
+    estrellaCentral.rotation.x += Math.PI * 0.5;
+    estrellaCentral.position.z += 10
 
-   //Rebotes de la parte superior
-   var reboteLargoIzq = new THREE.Mesh(georebotelargo,material);
-   reboteLargoIzq.position.x += 90;
-   reboteLargoIzq.position.y += 100;
-   reboteLargoIzq.position.z += 10;
-   reboteLargoIzq.rotation.z -= Math.PI * 0.25;
+    //Cubre-palanca que está en horizontal
+    cubrePalancaIzq = new THREE.Mesh(geopalancaround,material)
+    cubrePalancaIzq.position.x = -90
+    cubrePalancaIzq.position.y = -162
+    cubrePalancaIzq.position.z += 10
+    cubrePalancaIzq.rotation.z -= rotacionPalanca
+    plano.add(cubrePalancaIzq)
 
-   var reboteLargoDer = new THREE.Mesh(georebotelargo,material);
-   reboteLargoDer.position.x -= 90;
-   reboteLargoDer.position.y += 100;
-   reboteLargoDer.position.z += 10;
-   reboteLargoDer.rotation.z += Math.PI * 0.25;
+    cubrePalancaDer = new THREE.Mesh(geopalancaround,material)
+    cubrePalancaDer.position.x = 90
+    cubrePalancaDer.position.y = -162
+    cubrePalancaDer.position.z += 10
+    cubrePalancaDer.rotation.z += rotacionPalanca
+    plano.add(cubrePalancaDer)
 
-   var reboteCortoIzq1 = new THREE.Mesh(georebotecorto,material)
-   reboteCortoIzq1.position.x -= 80;
-   reboteCortoIzq1.position.y += 150;
-   reboteCortoIzq1.position.z += 10;
-   reboteCortoIzq1.rotation.z += Math.PI * 0.25;
+    //Pared cubre-palanca
+    var paredCubrePalancaIzq = new THREE.Mesh(geoparedcubrepalanca,material)
+    paredCubrePalancaIzq.position.x = cubrePalancaIzq.position.x -23
+    paredCubrePalancaIzq.position.y = cubrePalancaIzq.position.y +65
+    paredCubrePalancaIzq.position.z += 10
+    paredCubrePalancaIzq.rotation.z = Math.PI/2
+    plano.add(paredCubrePalancaIzq)
 
-   var reboteCortoIzq2 = new THREE.Mesh(georebotecorto,material)
-   reboteCortoIzq2.position.x -= 80;
-   reboteCortoIzq2.position.y += 190;
-   reboteCortoIzq2.position.z += 10;
-   reboteCortoIzq2.rotation.z += Math.PI * 0.25;
+    var paredCubrePalancaDer = new THREE.Mesh(geoparedcubrepalanca,material)
+    paredCubrePalancaDer.position.x = cubrePalancaDer.position.x +23
+    paredCubrePalancaDer.position.y = cubrePalancaDer.position.y +65
+    paredCubrePalancaDer.position.z += 10
+    paredCubrePalancaDer.rotation.z = Math.PI/2
+    plano.add(paredCubrePalancaDer)
 
-   var reboteCortoDer1 = new THREE.Mesh(georebotecorto,material)
-   reboteCortoDer1.position.x += 80;
-   reboteCortoDer1.position.y += 150;
-   reboteCortoDer1.position.z += 10;
-   reboteCortoDer1.rotation.z -= Math.PI * 0.25;
+    //Rebotes de cerca de la palanca 
+    var rebotePalancaIzq = new THREE.Mesh(georebotepalanca,material)
+    rebotePalancaIzq.position.x -= 70;
+    rebotePalancaIzq.position.y -= 100;
+    rebotePalancaIzq.position.z += 10;
+    rebotePalancaIzq.rotation.z -= Math.PI/2.75
+    plano.add(rebotePalancaIzq)
 
-   var reboteCortoDer2 = new THREE.Mesh(georebotecorto,material)
-   reboteCortoDer2.position.x += 80;
-   reboteCortoDer2.position.y += 190;
-   reboteCortoDer2.position.z += 10;
-   reboteCortoDer2.rotation.z -= Math.PI * 0.25;
+    //Rebotes de cerca de la palanca 
+    var rebotePalancaDer = new THREE.Mesh(georebotepalanca,material)
+    rebotePalancaDer.position.x += 70;
+    rebotePalancaDer.position.y -= 100;
+    rebotePalancaDer.position.z += 10;
+    rebotePalancaDer.rotation.z += Math.PI/2.75;
+    plano.add(rebotePalancaDer);
 
-   //Bolardos
-   var distancia = 30
+    //Rebotes de la parte superior
+    var reboteLargoIzq = new THREE.Mesh(georebotelargo,material);
+    reboteLargoIzq.position.x += 90;
+    reboteLargoIzq.position.y += 100;
+    reboteLargoIzq.position.z += 10;
+    reboteLargoIzq.rotation.z -= Math.PI * 0.25;
 
-   var bolardoDerecha = new THREE.Mesh(geocilindroBolardo,material)
-   bolardoDerecha.position.x = 15
-   bolardoDerecha.position.y = reboteCortoDer1.position.y
-   bolardoDerecha.position.z += 10
-   bolardoDerecha.rotation.x = Math.PI/2
+    var reboteLargoDer = new THREE.Mesh(georebotelargo,material);
+    reboteLargoDer.position.x -= 90;
+    reboteLargoDer.position.y += 100;
+    reboteLargoDer.position.z += 10;
+    reboteLargoDer.rotation.z += Math.PI * 0.25;
 
-   var bolardoIzquierda = new THREE.Mesh(geocilindroBolardo,material)
-   bolardoIzquierda.position.x = bolardoDerecha.position.x - distancia
-   bolardoIzquierda.position.y = reboteCortoIzq1.position.y
-   bolardoIzquierda.position.z += 10
-   bolardoIzquierda.rotation.x = Math.PI/2
+    var reboteCortoIzq1 = new THREE.Mesh(georebotecorto,material)
+    reboteCortoIzq1.position.x -= 80;
+    reboteCortoIzq1.position.y += 150;
+    reboteCortoIzq1.position.z += 10;
+    reboteCortoIzq1.rotation.z += Math.PI * 0.25;
 
-   var bolardoArriba = new THREE.Mesh(geocilindroBolardo,material)
-   bolardoArriba.position.y = bolardoDerecha.position.y - distancia
-   bolardoArriba.position.z += 10
-   bolardoArriba.rotation.x = Math.PI/2
-   var bolardoAbajo = new THREE.Mesh(geocilindroBolardo,material)
-   bolardoAbajo.position.y = bolardoDerecha.position.y + distancia
-   bolardoAbajo.position.z += 10
-   bolardoAbajo.rotation.x = Math.PI/2
+    var reboteCortoIzq2 = new THREE.Mesh(georebotecorto,material)
+    reboteCortoIzq2.position.x -= 80;
+    reboteCortoIzq2.position.y += 190;
+    reboteCortoIzq2.position.z += 10;
+    reboteCortoIzq2.rotation.z += Math.PI * 0.25;
 
-   //Pista
-   const width2 = 100, height2 = 300, width_segments =1, height_segments = 100;
-   this.plane = new THREE.PlaneGeometry(width2, height2, width_segments, height_segments);
-   var curve = new THREE.QuadraticBezierCurve3(
-	new THREE.Vector2( -100, 0 ),
-	new THREE.Vector2( 200, 200 ),
-	new THREE.Vector2( 100, 0 ));
+    var reboteCortoDer1 = new THREE.Mesh(georebotecorto,material)
+    reboteCortoDer1.position.x += 80;
+    reboteCortoDer1.position.y += 150;
+    reboteCortoDer1.position.z += 10;
+    reboteCortoDer1.rotation.z -= Math.PI * 0.25;
+
+    var reboteCortoDer2 = new THREE.Mesh(georebotecorto,material)
+    reboteCortoDer2.position.x += 80;
+    reboteCortoDer2.position.y += 190;
+    reboteCortoDer2.position.z += 10;
+    reboteCortoDer2.rotation.z -= Math.PI * 0.25;
+
+    //Bolardos
+    var distancia = 25
+    var bolardoDerecha = new THREE.Mesh(geocilindroBolardo,material)
+    bolardoDerecha.position.x = distancia
+    bolardoDerecha.position.y = reboteCortoDer1.position.y
+    bolardoDerecha.position.z += 10
+    bolardoDerecha.rotation.x = Math.PI/2
+
+    var bolardoIzquierda = new THREE.Mesh(geocilindroBolardo,material)
+    bolardoIzquierda.position.x =  - distancia
+    bolardoIzquierda.position.y = reboteCortoIzq1.position.y
+    bolardoIzquierda.position.z += 10
+    bolardoIzquierda.rotation.x = Math.PI/2
+
+    var bolardoArriba = new THREE.Mesh(geocilindroBolardo,material)
+    bolardoArriba.position.y = bolardoDerecha.position.y - distancia
+    bolardoArriba.position.z += 10
+    bolardoArriba.rotation.x = Math.PI/2
+
+    var bolardoAbajo = new THREE.Mesh(geocilindroBolardo,material)
+    bolardoAbajo.position.y = bolardoDerecha.position.y + distancia
+    bolardoAbajo.position.z += 10
+    bolardoAbajo.rotation.x = Math.PI/2
+
+    //Bolardos laterales
+    var bolardoLateralDerecha = new THREE.Mesh(geocilindroBolardo,material)
+    bolardoLateralDerecha.position.x = reboteCortoDer1.position.x + 55
+    bolardoLateralDerecha.position.y = reboteCortoDer1.position.y
+    bolardoLateralDerecha.position.z += 10
+    bolardoLateralDerecha.rotation.x = Math.PI/2
+
+
+    var bolardoLateralIzquierda = new THREE.Mesh(geocilindroBolardo,material)
+    bolardoLateralIzquierda.position.x = reboteCortoIzq1.position.x - 55
+    bolardoLateralIzquierda.position.y = reboteCortoIzq1.position.y
+    bolardoLateralIzquierda.position.z += 10
+    bolardoLateralIzquierda.rotation.x = Math.PI/2
+
+    //Estrella fondo
+    var estrellaFondo = new THREE.Mesh(geocilindrofondo,material)
+    estrellaFondo.position.y = bolardoArriba.position.y + 100
+    estrellaFondo.rotation.x += Math.PI * 0.5;
+    estrellaFondo.position.z += 10
+
+
+
+    //Pista
+    const width2 = 100, height2 = 350, width_segments =1, height_segments = 100;
+    this.plane = new THREE.PlaneGeometry(width2, height2, width_segments, height_segments);
+    var curve =  new THREE.EllipseCurve(
+      0, 0,             // ax, aY
+      10000, 200,            // xRadius, yRadius
+      0, Math.PI, // aStartAngle, aEndAngle
+      false             // aClockwise
+  );
+    
+    
     curveGeometry = new THREE.Geometry();
-    curveGeometry.vertices = curve.getPoints( plane.vertices.length/2 );
+    curveGeometry.vertices = curve.getSpacedPoints( plane.vertices.length/2 );
     curvaPlot = new THREE.Mesh(curveGeometry,material)
-    curvaPlot.add(new THREE.AxisHelper(300))
-  
-   for(let i=0; i<this.plane.vertices.length/2; i++) {
-     this.plane.vertices[2*i].z = curveGeometry.vertices[i].y;
-     this.plane.vertices[2*i+1].z = curveGeometry.vertices[i].y;
-   }
+    for(let i=0; i<this.plane.vertices.length/2; i++) {
+      this.plane.vertices[2*i].z = curveGeometry.vertices[i].y;
+      this.plane.vertices[2*i+1].z = curveGeometry.vertices[i].y;
+    }
 
    topePista = new THREE.Mesh(this.plane,  material);
-   //this.mesh2.rotation.y += Math.PI/2;
    topePista.rotation.x -= Math.PI/2;
    topePista.rotation.z -=Math.PI/2
-   topePista.position.y += 180
-   plano.add(topePista);
-   topePista.add(new THREE.AxisHelper(300))
+   topePista.position.y += 220
+   //plano.add(topePista);
+
+   var paredIzq = new THREE.Mesh(geopared,material)
+   paredIzq.position.x = -174
+   paredIzq.position.y = 85
+   paredIzq.rotation.y = Math.PI/2
+   //plano.add(paredIzq)
+
+   var paredDer = new THREE.Mesh(geopared,material)
+   paredDer.position.x = 174
+   paredDer.position.y = 85
+   paredDer.rotation.y = Math.PI/2
+   //plano.add(paredDer)
+
+   var limites = new THREE.Object3D()
+   limites.position.y = -80
+   limites.add(topePista)
+   limites.add(paredIzq)
+   limites.add(paredDer)
+   plano.add(limites)
+   //topePista.add(new THREE.AxisHelper(300))
 
 
    
    //ejePalancaDer.add(new THREE.AxisHelper(300))
-   ejePalancaIzq.add(new THREE.AxisHelper(300))
+   //ejePalancaIzq.add(new THREE.AxisHelper(300))
 
 
    //Añadimos objetos a la escena
@@ -256,6 +347,10 @@ function setCameras(ar){
    plano.add(bolardoIzquierda)
    plano.add(bolardoAbajo)
    plano.add(bolardoArriba)
+   plano.add(bolardoLateralDerecha)
+   plano.add(bolardoLateralIzquierda)
+   plano.add(estrellaFondo)
+
    //plano.add(topePista)
    //plano.add(THREE.AxisHelper(300))
    //palancaRounded.add(THREE.AxisHelper(300))
@@ -263,25 +358,41 @@ function setCameras(ar){
 
 
 
-   
-
+   //Movimiento para las palancas
+   var velocidad = 80
+   var giroPalancaIzqUp = new TWEEN.Tween( ejePalancaIzq.rotation ).to( {x:0, y:0, z:1.5}, velocidad )
+   var giroPalancaDerUp = new TWEEN.Tween( ejePalancaDer.rotation ).to( {x:0, y:0, z:-1.5}, velocidad )
+   var giroPalancaIzqDown = new TWEEN.Tween( ejePalancaIzq.rotation ).to( {x:0, y:0, z:0}, velocidad )
+   var giroPalancaDerDown = new TWEEN.Tween( ejePalancaDer.rotation ).to( {x:0, y:0, z:0}, velocidad )
 
    //Eventos de teclado
    keyboard = new THREEx.KeyboardState(renderer.domElement);  
    renderer.domElement.setAttribute("tabIndex", "0");
    renderer.domElement.focus();  
+
    keyboard.domElement.addEventListener('keydown', function(event){
-       if( keyboard.pressed('up')){
-       }	
-       if( keyboard.pressed('down')){
-       }	
-       if( keyboard.pressed('left')){
-        ejePalancaIzq.rotation.z += 0.1;
-       }	
-       if( keyboard.pressed('right')){
-        ejePalancaDer.rotation.z -= 0.1;
-       }	
-   })
+		if (event.repeat) {
+			return;
+		}
+		if ( keyboard.eventMatches(event, 'left') ){
+			giroPalancaIzqUp.start()   
+		}
+		if ( keyboard.eventMatches(event, 'right') ){
+			giroPalancaDerUp.start()   
+		}
+  })
+  
+  keyboard.domElement.addEventListener('keyup', function(event){
+		if (event.repeat) {
+			return;
+		}
+		if ( keyboard.eventMatches(event, 'left') ){
+			giroPalancaIzqDown.start()   
+		}
+		if ( keyboard.eventMatches(event, 'right') ){
+			giroPalancaDerDown.start()   
+		}
+	})
 
 
  }
@@ -337,7 +448,6 @@ function setCameras(ar){
     update();
 
     renderer.clear()
-
     renderer.setViewport(0,0,innerWidth, innerHeight)
     renderer.render(scene, camera);
  }
