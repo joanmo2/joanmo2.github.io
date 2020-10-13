@@ -350,4 +350,5 @@ function setCameras(ar){
         renderer.setViewport(0,0,innerWidth/4, innerWidth/4)
     }
     renderer.render(scene,planta)
+    renderer.domElement.focus();  
  }
