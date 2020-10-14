@@ -33,7 +33,7 @@ function esfera( radio, posicion, material ){
 	this.body.addShape( new CANNON.Sphere( radio ) );
 	this.body.position.copy( posicion );
 	this.visual = new THREE.Mesh( new THREE.SphereGeometry( radio ), 
-		          new THREE.MeshBasicMaterial( {wireframe: true } ) );
+		          new THREE.MeshBasicMaterial( {wireframe: true, material } ) );
 	this.visual.position.copy( this.body.position );
 }
 
@@ -79,7 +79,7 @@ function initPhysicWorld()
     frontWall.position.z = 5;
     world.addBody( frontWall );
     var leftWall = new CANNON.Body( {mass:0, material:groundMaterial} );
-    leftWall.addShape( new CANNON.Plane() );
+	leftWall.addShape( new CANNON.Plane() );
     leftWall.position.x = -5;
     leftWall.quaternion.setFromEuler(0,Math.PI/2,0,'XYZ');
     world.addBody( leftWall );

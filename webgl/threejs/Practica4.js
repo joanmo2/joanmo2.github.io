@@ -303,8 +303,8 @@ function setCameras(ar){
 	var h = gui.addFolder("Control Robot");
     h.add(effectController, "giroBase", -180, 180, 1).name("Giro base");
     h.add(effectController, "giroBrazo", -45, 45, 1).name("Giro brazo");
-    h.add(effectController, "giroAntebrazoY", -180, 180, 1).name("Giro antebrazo Y");
-    h.add(effectController, "giroAntebrazoZ", -90, 90, 1).name("Giro antebrazo Z ");
+    h.add(effectController, "giroAntebrazoY", -180, 180, 1).name("Giro antebrazoY ");
+    h.add(effectController, "giroAntebrazoZ", -90, 90, 1).name("Giro antebrazoZ ");
     h.add(effectController, "rotacionPinzas", -40, 220, 1).name("Giro Pinza");
     h.add(effectController, "aperturaPinzas", 0, 15, 1).name("Separación Pinzas");
 

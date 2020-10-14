@@ -8,11 +8,17 @@
 
  // Variables locales
  var car = new THREE.Object3D();;
+
  //variables camara
  var r = t = 50
  var l = b = -r;
  var cameraControler;
  var planta;
+
+ // Mundo fisico
+var world, reloj;
+
+var bola;
 
  //Var eje palanca
  var ejePalancaDer,pointToRotateAround;
@@ -25,10 +31,23 @@
 
 
  // Acciones
- init();
+ initPhysicWorld();
+ initVisualWorld();
  loadScene();
  setupGui();
  render();
+
+
+ function esfera( radio, posicion, material ){
+	var masa = 1;
+	this.body = new CANNON.Body( {mass: masa, material: material} );
+	this.body.addShape( new CANNON.Sphere( radio ) );
+	this.body.position.copy( posicion );
+	this.visual = new THREE.Mesh( new THREE.SphereGeometry( radio ), 
+        new THREE.MeshBasicMaterial({color:'red', wireframe:true}));
+	this.visual.position.copy( this.body.position );
+}
+
 
  //Fuente: https://discourse.threejs.org/t/round-edged-box/1402/6
  function createBoxWithRoundedEdges( width, height, depth, radius0, smoothness ) {
@@ -55,7 +74,7 @@
   }
 
 function setCameras(ar){
-    origen = new THREE.Vector3(0,0,0)
+    origen = new THREE.Vector3(0,200,0)
 
     if(ar>1){
         //planta = new THREE.OrthographicCamera(l*ar, r*ar, t, b, -20, 300);
@@ -75,7 +94,55 @@ function setCameras(ar){
 
 }
 
- function init(){
+/**
+ * Inicializa el mundo fisico con un
+ * suelo y cuatro paredes de altura infinita
+ */
+function initPhysicWorld() {
+  	// Mundo 
+  	world = new CANNON.World(); 
+   	world.gravity.set(0,-500,0); 
+   	//world.broadphase = new CANNON.NaiveBroadphase(); 
+    world.solver.iterations = 10; 
+
+    // Material y comportamiento
+    var groundMaterial = new CANNON.Material("groundMaterial");
+    var materialEsfera = new CANNON.Material("sphereMaterial");
+    var materialEstrella = new CANNON.Material("starMaterial")
+    world.addMaterial( materialEsfera );
+    world.addMaterial( groundMaterial );
+    world.addMaterial(materialEstrella);
+
+    var sphereGroundContactMaterial = new CANNON.ContactMaterial(groundMaterial,materialEsfera,
+      { friction: 0.7, 
+          restitution: 0.3 });
+    var sphereStarContactMaterial = new CANNON.ContactMaterial(materialEsfera,materialEstrella,
+      { friction: 0.1, 
+        restitution: 20.0});
+    world.addContactMaterial(sphereGroundContactMaterial);
+    world.addContactMaterial(sphereStarContactMaterial);
+
+    //Suelo
+    var groundShape = new CANNON.Plane();
+    var ground = new CANNON.Body({ mass: 0, material: groundMaterial });
+    ground.addShape(groundShape);
+    ground.position.set(0,-350,0);
+    ground.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0), -Math.PI/2);
+
+    //Estrella
+    var estrellaShape = new CANNON.Cylinder(40, 40, 20, 32)
+    var plane = new CANNON.Body({ mass: 0, material: materialEstrella });
+    plane.addShape(estrellaShape)
+    plane.position.z += 10
+
+    world.addBody(plane);
+
+    //Palanca derecha
+    var palancaShpe = new CANNON.
+
+}
+
+ function initVisualWorld(){
     // Crear el motor, la escena y la camara
     
     // Motor de render
@@ -84,6 +151,10 @@ function setCameras(ar){
     renderer.setClearColor(new THREE.Color(0xFFFFFF));
     renderer.autoClear = false;
     document.getElementById("container").appendChild(renderer.domElement);
+
+    // Reloj
+	  reloj = new THREE.Clock();
+	  reloj.start();
 
     // Escena
     scene = new THREE.Scene();
@@ -101,8 +172,6 @@ function setCameras(ar){
 
  }
 
-
-
   function loadScene(){
     //Materiales
     var material = new THREE.MeshBasicMaterial({color:'red', wireframe:true});
@@ -110,7 +179,7 @@ function setCameras(ar){
    // Geometrias 
     var geoplano = new THREE.PlaneGeometry(500, 700, 20, 20);
     var geopared = new THREE.PlaneGeometry(100, 350, 20, 20);
-    var geoesfera = new THREE.SphereGeometry(8,8,10);
+    //var geoesfera = new THREE.SphereGeometry(8,8,10);
     var geopalancaround = createBoxWithRoundedEdges( 60, 8, 20, 3, 1 )
     var geocilindro = new THREE.CylinderBufferGeometry( 40, 40, 20, 32 );
     var geocilindroBolardo = new THREE.CylinderBufferGeometry( 10, 10, 20, 20 );
@@ -120,11 +189,15 @@ function setCameras(ar){
     var georebotepalanca = createBoxWithRoundedEdges( 85, 8, 20, 3, 1 )
     var geoparedcubrepalanca = createBoxWithRoundedEdges( 100, 8, 20, 3, 1 )
 
+    scene.add(new THREE.AxisHelper(300))
    //Objetos
     var plano = new THREE.Mesh(geoplano, material);
     plano.rotation.x = -Math.PI * 0.25;
+    plano.add(new THREE.AxisHelper(300))
 
-    var bola = new THREE.Mesh(geoesfera,material)
+    bola = new esfera(12,new CANNON.Vec3(1,150,0),"sphereMaterial")
+    plano.add(bola.visual)
+    world.addBody(bola.body)
 
     //Palancas
     var palancaIzq = new THREE.Mesh(geopalancaround,material)
@@ -282,7 +355,7 @@ function setCameras(ar){
 
 
     //Pista
-    const width2 = 100, height2 = 350, width_segments =1, height_segments = 100;
+    const width2 = 100, height2 = 360, width_segments =15, height_segments = 200;
     this.plane = new THREE.PlaneGeometry(width2, height2, width_segments, height_segments);
     var curve =  new THREE.EllipseCurve(
       0, 0,             // ax, aY
@@ -307,14 +380,14 @@ function setCameras(ar){
    //plano.add(topePista);
 
    var paredIzq = new THREE.Mesh(geopared,material)
-   paredIzq.position.x = -174
-   paredIzq.position.y = 85
+   paredIzq.position.x = -180
+   paredIzq.position.y = 75
    paredIzq.rotation.y = Math.PI/2
    //plano.add(paredIzq)
 
    var paredDer = new THREE.Mesh(geopared,material)
-   paredDer.position.x = 174
-   paredDer.position.y = 85
+   paredDer.position.x = 180
+   paredDer.position.y = 75
    paredDer.rotation.y = Math.PI/2
    //plano.add(paredDer)
 
@@ -436,10 +509,12 @@ function setCameras(ar){
 
  function update(){
     var ahora = Date.now();							// Hora actual
-    
+    var segundos = reloj.getDelta();	// tiempo en segundos que ha pasado
+	  world.step( segundos );				// recalcula el mundo tras ese tiempo
     //Actualizar interpoladores
+    bola.visual.position.copy( bola.body.position )
     TWEEN.update()
-	antes = ahora;
+	  antes = ahora;
  }
  
  function render(){
