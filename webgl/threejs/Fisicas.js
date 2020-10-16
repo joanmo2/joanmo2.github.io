@@ -45,7 +45,7 @@ function initPhysicWorld()
 {
 	// Mundo 
   	world = new CANNON.World(); 
-   	world.gravity.set(0,-9.8,0); 
+   	world.gravity.set(0,-300.0,0); 
    	///world.broadphase = new CANNON.NaiveBroadphase(); 
    	world.solver.iterations = 10; 
 
@@ -195,10 +195,8 @@ function update()
 	var segundos = reloj.getDelta();	// tiempo en segundos que ha pasado
 	world.step( segundos );				// recalcula el mundo tras ese tiempo
 
-	for (var i = 0; i < esferas.length; i++) {
-		esferas[i].visual.position.copy( esferas[i].body.position );
-		esferas[i].visual.quaternion.copy( esferas[i].body.quaternion );
-	};
+	bola.visual.position.copy( bola.body.position );
+	bola.visual.quaternion.copy( bola.body.quaternion );
 
 	// Actualiza el monitor 
 	stats.update();

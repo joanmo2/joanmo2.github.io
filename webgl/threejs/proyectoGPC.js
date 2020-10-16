@@ -16,9 +16,14 @@
  var planta;
 
  // Mundo fisico
-var world, reloj;
+var world, reloj,physics,ground;
 
-var bola;
+//Bodies
+var bola,rebotePalancaDerBody,helper;
+//Materiales
+var groundMaterial,materialEsfera,materialEstrella;
+var total = Math.cos(Math.PI * 0.25) * 250;
+
 
  //Var eje palanca
  var ejePalancaDer,pointToRotateAround;
@@ -31,8 +36,8 @@ var bola;
 
 
  // Acciones
- initPhysicWorld();
  initVisualWorld();
+ initPhysicWorld();
  loadScene();
  setupGui();
  render();
@@ -42,7 +47,7 @@ var bola;
 	var masa = 1;
 	this.body = new CANNON.Body( {mass: masa, material: material} );
 	this.body.addShape( new CANNON.Sphere( radio ) );
-	this.body.position.copy( posicion );
+  this.body.position.copy( posicion );
 	this.visual = new THREE.Mesh( new THREE.SphereGeometry( radio ), 
         new THREE.MeshBasicMaterial({color:'red', wireframe:true}));
 	this.visual.position.copy( this.body.position );
@@ -74,7 +79,7 @@ var bola;
   }
 
 function setCameras(ar){
-    origen = new THREE.Vector3(0,200,0)
+    origen = new THREE.Vector3(200,500,200)
 
     if(ar>1){
         //planta = new THREE.OrthographicCamera(l*ar, r*ar, t, b, -20, 300);
@@ -86,7 +91,7 @@ function setCameras(ar){
     //planta.up = new THREE.Vector3(0,0,-1);
 
     camera = new THREE.PerspectiveCamera( 50, ar, 0.1, 10000);
-    camera.position.set(0,500,700);
+    camera.position.set(0,500,500);
     camera.lookAt(origen);
 
     scene.add(camera);
@@ -99,16 +104,18 @@ function setCameras(ar){
  * suelo y cuatro paredes de altura infinita
  */
 function initPhysicWorld() {
-  	// Mundo 
-  	world = new CANNON.World(); 
-   	world.gravity.set(0,-500,0); 
-   	//world.broadphase = new CANNON.NaiveBroadphase(); 
+    // Mundo 
+    world = new CANNON.World();
+    world.broadphase = new CANNON.NaiveBroadphase() 
+     world.gravity.set(0,-150,0); 
+   	world.broadphase = new CANNON.NaiveBroadphase(); 
     world.solver.iterations = 10; 
+    helper = new CannonHelper(scene,world)
 
     // Material y comportamiento
-    var groundMaterial = new CANNON.Material("groundMaterial");
-    var materialEsfera = new CANNON.Material("sphereMaterial");
-    var materialEstrella = new CANNON.Material("starMaterial")
+    groundMaterial = new CANNON.Material("groundMaterial");
+    materialEsfera = new CANNON.Material("sphereMaterial");
+    materialEstrella = new CANNON.Material("starMaterial")
     world.addMaterial( materialEsfera );
     world.addMaterial( groundMaterial );
     world.addMaterial(materialEstrella);
@@ -123,22 +130,18 @@ function initPhysicWorld() {
     world.addContactMaterial(sphereStarContactMaterial);
 
     //Suelo
-    var groundShape = new CANNON.Plane();
-    var ground = new CANNON.Body({ mass: 0, material: groundMaterial });
+    var groundShape = new CANNON.Box(new CANNON.Vec3(350,350,1));
+    ground = new CANNON.Body({ mass: 0, material: groundMaterial });
     ground.addShape(groundShape);
-    ground.position.set(0,-350,0);
-    ground.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0), -Math.PI/2);
+    ground.position.set(0,0,0);
+    ground.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0), -Math.PI/4);
+    world.add(ground)
 
-    //Estrella
-    var estrellaShape = new CANNON.Cylinder(40, 40, 20, 32)
-    var plane = new CANNON.Body({ mass: 0, material: materialEstrella });
-    plane.addShape(estrellaShape)
-    plane.position.z += 10
+    world.addBody(ground)
 
-    world.addBody(plane);
+    //helper.addVisual(ground,0xFFFFFF)
 
-    //Palanca derecha
-    var palancaShpe = new CANNON.
+
 
 }
 
@@ -180,7 +183,8 @@ function initPhysicWorld() {
     var geoplano = new THREE.PlaneGeometry(500, 700, 20, 20);
     var geopared = new THREE.PlaneGeometry(100, 350, 20, 20);
     //var geoesfera = new THREE.SphereGeometry(8,8,10);
-    var geopalancaround = createBoxWithRoundedEdges( 60, 8, 20, 3, 1 )
+    var geopalancaround = createBoxWithRoundedEdges( 70, 8, 20, 3, 1 )
+    var geocubrepalancaround = createBoxWithRoundedEdges( 85, 8, 20, 3, 1 )
     var geocilindro = new THREE.CylinderBufferGeometry( 40, 40, 20, 32 );
     var geocilindroBolardo = new THREE.CylinderBufferGeometry( 10, 10, 20, 20 );
     var georebotelargo = createBoxWithRoundedEdges( 100, 8, 20, 3, 1 )
@@ -193,67 +197,182 @@ function initPhysicWorld() {
    //Objetos
     var plano = new THREE.Mesh(geoplano, material);
     plano.rotation.x = -Math.PI * 0.25;
-    plano.add(new THREE.AxisHelper(300))
+    plano.position.y = 0
+    //plano.add(new THREE.AxisHelper(300))
 
-    bola = new esfera(12,new CANNON.Vec3(1,150,0),"sphereMaterial")
-    plano.add(bola.visual)
+    var aux = Math.sin(-Math.PI * 0.25) * 350;
+    var aux2 = Math.cos(-Math.PI * 0.25) * 350;
+    bola = new esfera(12,new CANNON.Vec3(-10,aux2,aux +50),"sphereMaterial")
+    helper.addVisual(bola.body)
     world.addBody(bola.body)
+    scene.add(bola.visual)
 
     //Palancas
     var palancaIzq = new THREE.Mesh(geopalancaround,material)
-    palancaIzq.position.x += 19;
-    palancaIzq.position.y -= 18;
+    palancaIzq.position.x += 30;
+    palancaIzq.position.y -= 30;
     palancaIzq.position.z += 10;
     palancaIzq.rotation.z -= rotacionPalanca;
-
     var palancaDer = new THREE.Mesh(geopalancaround,material)
-    palancaDer.position.x -= 19;
-    palancaDer.position.y -= 18;
+    palancaDer.position.x -= 30;
+    palancaDer.position.y -= 30;
     palancaDer.position.z += 10;
     palancaDer.rotation.z += rotacionPalanca;
     
     //Ejes sobre los que pivotan las palancas
     ejePalancaDer = new THREE.Object3D();
-    ejePalancaDer.position.set(65,-182,0)
+    ejePalancaDer.position.set(57+24,-185,0)
     ejePalancaDer.add(palancaDer)
 
     ejePalancaIzq = new THREE.Object3D();
-    ejePalancaIzq.position.set(-65,-182,0)
+    ejePalancaIzq.position.set(-57-24,-185,0)
     ejePalancaIzq.add(palancaIzq)
 
     var estrellaCentral = new THREE.Mesh(geocilindro,material)
     estrellaCentral.rotation.x += Math.PI * 0.5;
     estrellaCentral.position.z += 10
 
+    //Estrella FISICA
+    var estrellaShape = new CANNON.Cylinder(40, 40, 80, 32)
+    var star = new CANNON.Body({ mass: 0, material: materialEstrella });
+    star.addShape(estrellaShape)
+    star.position.set(0,0,0);
+    star.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0), -Math.PI/4);
+    world.addBody(star)
+
+    //PALANCA Física
+
+    var aux = -Math.sin(-Math.PI * 0.25) * (-215);
+    var aux2 = Math.cos(-Math.PI * 0.25) * (-215);
+
+    var palancaIzqShape = new CANNON.Box(new CANNON.Vec3(85/2, 8/2, 20))
+    palancaIzqBody = new CANNON.Body({ mass: 0, 
+      material: materialEstrella ,
+    })
+    palancaIzqBody.addShape(palancaIzqShape)
+    palancaIzqBody.position.set(ejePalancaIzq.position.x + palancaIzq.position.x ,aux,-(aux2)) 
+    var quatX = new CANNON.Quaternion();
+    var quatZ = new CANNON.Quaternion();
+    quatX.setFromAxisAngle(new CANNON.Vec3(1,0,0), -Math.PI/4);
+    quatZ.setFromAxisAngle(new CANNON.Vec3(0,0,1), -rotacionPalanca);
+    var quaternion = quatX.mult(quatZ);
+    quaternion.normalize();
+    palancaIzqBody.quaternion.copy(quaternion)
+    console.log(palancaIzqBody.rotation)
+    world.addBody(palancaIzqBody)
+    helper.addVisual(palancaIzqBody)
+    //console.log(ejePalancaIzq.position)
+
+    var palancaDerShape = new CANNON.Box(new CANNON.Vec3(85/2, 8/2, 20))
+    palancaDerBody = new CANNON.Body({ mass: 0, material: materialEstrella })
+    palancaDerBody.addShape(palancaDerShape)
+    palancaDerBody.position.set(ejePalancaDer.position.x + palancaDer.position.x ,aux,-(aux2)) 
+    var quatX = new CANNON.Quaternion();
+    var quatZ = new CANNON.Quaternion();
+    quatX.setFromAxisAngle(new CANNON.Vec3(1,0,0), -Math.PI/4);
+    quatZ.setFromAxisAngle(new CANNON.Vec3(0,0,1), rotacionPalanca);
+    var quaternion = quatX.mult(quatZ);
+    quaternion.normalize();
+    palancaDerBody.quaternion.copy(quaternion)
+    world.addBody(palancaDerBody)
+    helper.addVisual(palancaDerBody)
+
+    
+
     //Cubre-palanca que está en horizontal
-    cubrePalancaIzq = new THREE.Mesh(geopalancaround,material)
-    cubrePalancaIzq.position.x = -90
-    cubrePalancaIzq.position.y = -162
+    cubrePalancaIzq = new THREE.Mesh(geocubrepalancaround,material)
+    cubrePalancaIzq.position.x = -83-24
+    cubrePalancaIzq.position.y = -165
     cubrePalancaIzq.position.z += 10
     cubrePalancaIzq.rotation.z -= rotacionPalanca
     plano.add(cubrePalancaIzq)
 
-    cubrePalancaDer = new THREE.Mesh(geopalancaround,material)
-    cubrePalancaDer.position.x = 90
-    cubrePalancaDer.position.y = -162
+    cubrePalancaDer = new THREE.Mesh(geocubrepalancaround,material)
+    cubrePalancaDer.position.x = 83 +24
+    cubrePalancaDer.position.y = -165
     cubrePalancaDer.position.z += 10
     cubrePalancaDer.rotation.z += rotacionPalanca
     plano.add(cubrePalancaDer)
 
+    //Cubre-palanca FISICO
+    var aux = -Math.sin(-Math.PI * 0.25) * (-165);
+    var aux2 = Math.cos(-Math.PI * 0.25) * (-165);
+
+    var cubrePalancaShape = new CANNON.Box(new CANNON.Vec3(85/2, 8/2, 20))
+    cubrePalancaBody = new CANNON.Body({ mass: 0, material: materialEstrella })
+    cubrePalancaBody.addShape(cubrePalancaShape)
+    cubrePalancaBody.position.set(cubrePalancaDer.position.x,aux,-(aux2)) 
+    var quatX = new CANNON.Quaternion();
+    var quatZ = new CANNON.Quaternion();
+    quatX.setFromAxisAngle(new CANNON.Vec3(1,0,0), -Math.PI/4);
+    quatZ.setFromAxisAngle(new CANNON.Vec3(0,0,1), rotacionPalanca);
+    var quaternion = quatX.mult(quatZ);
+    quaternion.normalize();
+    cubrePalancaBody.quaternion.copy(quaternion)
+    world.addBody( cubrePalancaBody)
+    helper.addVisual(cubrePalancaBody)
+
+    cubrePalancaIzqBody = new CANNON.Body({ mass: 0, material: materialEstrella })
+    cubrePalancaIzqBody.addShape(cubrePalancaShape)
+    cubrePalancaIzqBody.position.set(cubrePalancaIzq.position.x,aux,-(aux2)) 
+    var quatX = new CANNON.Quaternion();
+    var quatZ = new CANNON.Quaternion();
+    quatX.setFromAxisAngle(new CANNON.Vec3(1,0,0), -Math.PI/4);
+    quatZ.setFromAxisAngle(new CANNON.Vec3(0,0,1), -rotacionPalanca);
+    var quaternion = quatX.mult(quatZ);
+    quaternion.normalize();
+    cubrePalancaIzqBody.quaternion.copy(quaternion)
+    world.addBody( cubrePalancaIzqBody)
+    helper.addVisual(cubrePalancaIzqBody)
+
     //Pared cubre-palanca
     var paredCubrePalancaIzq = new THREE.Mesh(geoparedcubrepalanca,material)
-    paredCubrePalancaIzq.position.x = cubrePalancaIzq.position.x -23
-    paredCubrePalancaIzq.position.y = cubrePalancaIzq.position.y +65
+    paredCubrePalancaIzq.position.x = -90-24 -23
+    paredCubrePalancaIzq.position.y = -162 +75
     paredCubrePalancaIzq.position.z += 10
     paredCubrePalancaIzq.rotation.z = Math.PI/2
     plano.add(paredCubrePalancaIzq)
 
     var paredCubrePalancaDer = new THREE.Mesh(geoparedcubrepalanca,material)
-    paredCubrePalancaDer.position.x = cubrePalancaDer.position.x +23
-    paredCubrePalancaDer.position.y = cubrePalancaDer.position.y +65
+    paredCubrePalancaDer.position.x = 90+24 +23
+    paredCubrePalancaDer.position.y = -162 + 75
     paredCubrePalancaDer.position.z += 10
     paredCubrePalancaDer.rotation.z = Math.PI/2
     plano.add(paredCubrePalancaDer)
+
+    //PAREDES FÍSICAS
+    var aux = -Math.sin(-Math.PI * 0.25) * (-87);
+    var aux2 = Math.cos(-Math.PI * 0.25) * (-87);
+
+    var paredCubrePalancaShape = new CANNON.Box(new CANNON.Vec3(100/2, 8/2, 20))
+    paredCubrePalancaDerBody = new CANNON.Body({ mass: 0, material: materialEstrella })
+    paredCubrePalancaDerBody.addShape(paredCubrePalancaShape)
+    paredCubrePalancaDerBody.position.set(cubrePalancaDer.position.x +30,aux,-(aux2)) 
+    var quatX = new CANNON.Quaternion();
+    var quatZ = new CANNON.Quaternion();
+    quatX.setFromAxisAngle(new CANNON.Vec3(1,0,0), -Math.PI/4);
+    quatZ.setFromAxisAngle(new CANNON.Vec3(0,0,1), Math.PI/2);
+    var quaternion = quatX.mult(quatZ);
+    quaternion.normalize();
+    paredCubrePalancaDerBody.quaternion.copy(quaternion)
+    world.addBody( paredCubrePalancaDerBody)
+
+    paredCubrePalancaIzqBody = new CANNON.Body({ mass: 0, material: materialEstrella })
+    paredCubrePalancaIzqBody.addShape(paredCubrePalancaShape)
+    paredCubrePalancaIzqBody.position.set(cubrePalancaIzq.position.x -30,aux,-(aux2)) 
+    var quatX = new CANNON.Quaternion();
+    var quatZ = new CANNON.Quaternion();
+    quatX.setFromAxisAngle(new CANNON.Vec3(1,0,0), -Math.PI/4);
+    quatZ.setFromAxisAngle(new CANNON.Vec3(0,0,1), -Math.PI/2);
+    var quaternion = quatX.mult(quatZ);
+    quaternion.normalize();
+    paredCubrePalancaIzqBody.quaternion.copy(quaternion)
+    world.addBody( paredCubrePalancaIzqBody)
+    helper.addVisual( paredCubrePalancaIzqBody)
+    helper.addVisual( paredCubrePalancaDerBody)
+
+
+    
 
     //Rebotes de cerca de la palanca 
     var rebotePalancaIzq = new THREE.Mesh(georebotepalanca,material)
@@ -263,13 +382,46 @@ function initPhysicWorld() {
     rebotePalancaIzq.rotation.z -= Math.PI/2.75
     plano.add(rebotePalancaIzq)
 
-    //Rebotes de cerca de la palanca 
+    
+
+    //Rebotes de cerca de la palanca VISUAL
     var rebotePalancaDer = new THREE.Mesh(georebotepalanca,material)
     rebotePalancaDer.position.x += 70;
     rebotePalancaDer.position.y -= 100;
     rebotePalancaDer.position.z += 10;
     rebotePalancaDer.rotation.z += Math.PI/2.75;
     plano.add(rebotePalancaDer);
+
+    //Rebote palanca físico
+    var aux = Math.sin(-Math.PI * 0.25) * -100;
+    var aux2 = Math.cos(-Math.PI * 0.25) * -100;
+
+    var rebotePalancaShape = new CANNON.Box(new CANNON.Vec3(85/2, 8/2, 20))
+    rebotePalancaDerBody = new CANNON.Body({ mass: 0, material: materialEstrella })
+    rebotePalancaDerBody.addShape(rebotePalancaShape)
+    rebotePalancaDerBody.position.set(70,-aux,-(aux2)) 
+    var quatX = new CANNON.Quaternion();
+    var quatZ = new CANNON.Quaternion();
+    quatX.setFromAxisAngle(new CANNON.Vec3(1,0,0), -Math.PI/4);
+    quatZ.setFromAxisAngle(new CANNON.Vec3(0,0,1), Math.PI/3.1);
+    var quaternion = quatX.mult(quatZ);
+    quaternion.normalize();
+    rebotePalancaDerBody.quaternion.copy(quaternion)
+    world.addBody(rebotePalancaDerBody)
+
+    rebotePalancaIzqBody = new CANNON.Body({ mass: 0, material: materialEstrella })
+    rebotePalancaIzqBody.addShape(rebotePalancaShape)
+    rebotePalancaIzqBody.position.set(-70,-aux,-(aux2)) 
+    var quatX = new CANNON.Quaternion();
+    var quatZ = new CANNON.Quaternion();
+    quatX.setFromAxisAngle(new CANNON.Vec3(1,0,0), -Math.PI/4);
+    quatZ.setFromAxisAngle(new CANNON.Vec3(0,0,1), -Math.PI/3.1);
+    var quaternion = quatX.mult(quatZ);
+    quaternion.normalize();
+    rebotePalancaIzqBody.quaternion.copy(quaternion)
+    world.addBody(rebotePalancaIzqBody)
+    helper.addVisual(rebotePalancaIzqBody)
+    helper.addVisual(rebotePalancaDerBody)
 
     //Rebotes de la parte superior
     var reboteLargoIzq = new THREE.Mesh(georebotelargo,material);
@@ -430,12 +582,35 @@ function initPhysicWorld() {
    //scene.add( THREE.AxisHelper(300)); 
 
 
+    console.log(palancaIzq.quaternion)
+    //console.log(palancaIzqBody.quaternion)
 
    //Movimiento para las palancas
-   var velocidad = 80
+    velocidad = 80
+    posicionInicial = palancaIzqBody.position
+    quaternionInicial = palancaIzqBody.quaternion
+    console.log(posicionInicial)
+   var quatX = new CANNON.Quaternion();
+   var quatZ = new CANNON.Quaternion();
+   var quatZ2 = new CANNON.Quaternion();
+   quatX.setFromAxisAngle(new CANNON.Vec3(1,0,0), -Math.PI/4);
+   quatZ.setFromAxisAngle(new CANNON.Vec3(0,0,1),-rotacionPalanca);
+   quatZ2.setFromAxisAngle(new CANNON.Vec3(0,0,1),1.5);
+   var quaternion = quatX.mult(quatZ);
+   quaternion.normalize();
+   quaternion = quaternion.mult(quatZ2)
+   quaternion.normalize();
+   quaternionInicial = quaternion
+   var aux = Math.sin(-Math.PI * 0.25) * -215;
+   var aux2 = Math.cos(-Math.PI * 0.25) * -215;
    var giroPalancaIzqUp = new TWEEN.Tween( ejePalancaIzq.rotation ).to( {x:0, y:0, z:1.5}, velocidad )
+   var giroPalancaIzqUpFisico = new TWEEN.Tween( palancaIzqBody.quaternion ).to( quaternion, velocidad )
+   var giroPalancaIzqUpPosicion = new TWEEN.Tween( palancaIzqBody.position ).to( {x:palancaIzqBody.position.x,
+  y: -aux+40, z: -aux2-30}, velocidad )
    var giroPalancaDerUp = new TWEEN.Tween( ejePalancaDer.rotation ).to( {x:0, y:0, z:-1.5}, velocidad )
    var giroPalancaIzqDown = new TWEEN.Tween( ejePalancaIzq.rotation ).to( {x:0, y:0, z:0}, velocidad )
+   var giroPalancaIzqDownFisico = new TWEEN.Tween( palancaIzqBody.quaternion ).to( quaternionInicial, velocidad )
+   var giroPalancaIzqDownPosicion = new TWEEN.Tween( palancaIzqBody.position ).to( posicionInicial, velocidad )
    var giroPalancaDerDown = new TWEEN.Tween( ejePalancaDer.rotation ).to( {x:0, y:0, z:0}, velocidad )
 
    //Eventos de teclado
@@ -448,10 +623,14 @@ function initPhysicWorld() {
 			return;
 		}
 		if ( keyboard.eventMatches(event, 'left') ){
-			giroPalancaIzqUp.start()   
+      giroPalancaIzqUp.start()  
+      console.log(palancaIzq.quaternion)
+      giroPalancaIzqUpFisico.start()
+      giroPalancaIzqUpPosicion.start()
 		}
 		if ( keyboard.eventMatches(event, 'right') ){
-			giroPalancaDerUp.start()   
+      console.log(posicionInicial)
+      giroPalancaDerUp.start()   
 		}
   })
   
@@ -460,7 +639,10 @@ function initPhysicWorld() {
 			return;
 		}
 		if ( keyboard.eventMatches(event, 'left') ){
-			giroPalancaIzqDown.start()   
+      giroPalancaIzqDown.start() 
+      giroPalancaIzqDownFisico.start()
+      giroPalancaIzqDownPosicion.start()  
+      console.log(posicionInicial)
 		}
 		if ( keyboard.eventMatches(event, 'right') ){
 			giroPalancaDerDown.start()   
@@ -510,9 +692,10 @@ function initPhysicWorld() {
  function update(){
     var ahora = Date.now();							// Hora actual
     var segundos = reloj.getDelta();	// tiempo en segundos que ha pasado
-	  world.step( segundos );				// recalcula el mundo tras ese tiempo
+	  world.step( segundos);				// recalcula el mundo tras ese tiempo
     //Actualizar interpoladores
     bola.visual.position.copy( bola.body.position )
+    helper.update()
     TWEEN.update()
 	  antes = ahora;
  }
