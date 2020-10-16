@@ -724,7 +724,7 @@ function initPhysicWorld() {
     var ahora = Date.now();							// Hora actual
     var segundos = reloj.getDelta();
     //console.log(segundos)	// tiempo en segundos que ha pasado
-	  world.step( 1/60);				// recalcula el mundo tras ese tiempo
+	  world.step(segundos);				// recalcula el mundo tras ese tiempo
     //Actualizar interpoladores
     bola.visual.position.copy( bola.body.position )
     helper.update()
