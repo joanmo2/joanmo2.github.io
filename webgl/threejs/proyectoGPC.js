@@ -107,7 +107,7 @@ function initPhysicWorld() {
     // Mundo 
     world = new CANNON.World();
     world.broadphase = new CANNON.NaiveBroadphase() 
-    world.gravity.set(0,-1,0); 
+    world.gravity.set(0,-100,0); 
    	world.broadphase = new CANNON.NaiveBroadphase(); 
     world.solver.iterations = 10; 
     helper = new CannonHelper(scene,world)
