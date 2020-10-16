@@ -44,7 +44,7 @@ var total = Math.cos(Math.PI * 0.25) * 250;
 
 
  function esfera( radio, posicion, material ){
-	var masa = 1;
+	var masa = 10;
 	this.body = new CANNON.Body( {mass: masa, material: material} );
 	this.body.addShape( new CANNON.Sphere( radio ) );
   this.body.position.copy( posicion );
@@ -107,7 +107,7 @@ function initPhysicWorld() {
     // Mundo 
     world = new CANNON.World();
     world.broadphase = new CANNON.NaiveBroadphase() 
-     world.gravity.set(0,-150,0); 
+    world.gravity.set(0,-1,0); 
    	world.broadphase = new CANNON.NaiveBroadphase(); 
     world.solver.iterations = 10; 
     helper = new CannonHelper(scene,world)
@@ -115,10 +115,12 @@ function initPhysicWorld() {
     // Material y comportamiento
     groundMaterial = new CANNON.Material("groundMaterial");
     materialEsfera = new CANNON.Material("sphereMaterial");
-    materialEstrella = new CANNON.Material("starMaterial")
+    materialEstrella = new CANNON.Material("starMaterial");
+    materialPalanca = new CANNON.Material("palancaMaterial");
     world.addMaterial( materialEsfera );
     world.addMaterial( groundMaterial );
     world.addMaterial(materialEstrella);
+    world.addMaterial(materialPalanca);
 
     var sphereGroundContactMaterial = new CANNON.ContactMaterial(groundMaterial,materialEsfera,
       { friction: 0.7, 
@@ -126,8 +128,12 @@ function initPhysicWorld() {
     var sphereStarContactMaterial = new CANNON.ContactMaterial(materialEsfera,materialEstrella,
       { friction: 0.1, 
         restitution: 20.0});
+    var spherePalancaContactMaterial = new CANNON.ContactMaterial(materialEsfera,materialEstrella,
+      { friction: 0.7, 
+        restitution: 200.0});
     world.addContactMaterial(sphereGroundContactMaterial);
     world.addContactMaterial(sphereStarContactMaterial);
+    world.addContactMaterial(spherePalancaContactMaterial);
 
     //Suelo
     var groundShape = new CANNON.Box(new CANNON.Vec3(350,350,1));
@@ -245,9 +251,10 @@ function initPhysicWorld() {
     var aux = -Math.sin(-Math.PI * 0.25) * (-215);
     var aux2 = Math.cos(-Math.PI * 0.25) * (-215);
 
-    var palancaIzqShape = new CANNON.Box(new CANNON.Vec3(85/2, 8/2, 20))
+    var palancaIzqShape = new CANNON.Box(new CANNON.Vec3(85/2, 8/2, 40/2))
     palancaIzqBody = new CANNON.Body({ mass: 0, 
-      material: materialEstrella ,
+      material: materialPalanca ,
+      type: CANNON.Body.KINEMATIC,
     })
     palancaIzqBody.addShape(palancaIzqShape)
     palancaIzqBody.position.set(ejePalancaIzq.position.x + palancaIzq.position.x ,aux,-(aux2)) 
@@ -264,7 +271,8 @@ function initPhysicWorld() {
     //console.log(ejePalancaIzq.position)
 
     var palancaDerShape = new CANNON.Box(new CANNON.Vec3(85/2, 8/2, 20))
-    palancaDerBody = new CANNON.Body({ mass: 0, material: materialEstrella })
+    palancaDerBody = new CANNON.Body({ mass: 0, material: materialPalanca ,type: CANNON.Body.KINEMATIC,
+    })
     palancaDerBody.addShape(palancaDerShape)
     palancaDerBody.position.set(ejePalancaDer.position.x + palancaDer.position.x ,aux,-(aux2)) 
     var quatX = new CANNON.Quaternion();
@@ -582,36 +590,58 @@ function initPhysicWorld() {
    //scene.add( THREE.AxisHelper(300)); 
 
 
-    console.log(palancaIzq.quaternion)
+    //console.log(palancaIzq.quaternion)
     //console.log(palancaIzqBody.quaternion)
 
    //Movimiento para las palancas
-    velocidad = 80
+    velocidad = 40
     posicionInicial = palancaIzqBody.position
     quaternionInicial = palancaIzqBody.quaternion
-    console.log(posicionInicial)
+    //console.log(posicionInicial)
    var quatX = new CANNON.Quaternion();
    var quatZ = new CANNON.Quaternion();
-   var quatZ2 = new CANNON.Quaternion();
    quatX.setFromAxisAngle(new CANNON.Vec3(1,0,0), -Math.PI/4);
-   quatZ.setFromAxisAngle(new CANNON.Vec3(0,0,1),-rotacionPalanca);
-   quatZ2.setFromAxisAngle(new CANNON.Vec3(0,0,1),1.5);
+   quatZ.setFromAxisAngle(new CANNON.Vec3(0,0,1),rotacionPalanca);
    var quaternion = quatX.mult(quatZ);
    quaternion.normalize();
-   quaternion = quaternion.mult(quatZ2)
-   quaternion.normalize();
-   quaternionInicial = quaternion
    var aux = Math.sin(-Math.PI * 0.25) * -215;
    var aux2 = Math.cos(-Math.PI * 0.25) * -215;
    var giroPalancaIzqUp = new TWEEN.Tween( ejePalancaIzq.rotation ).to( {x:0, y:0, z:1.5}, velocidad )
    var giroPalancaIzqUpFisico = new TWEEN.Tween( palancaIzqBody.quaternion ).to( quaternion, velocidad )
    var giroPalancaIzqUpPosicion = new TWEEN.Tween( palancaIzqBody.position ).to( {x:palancaIzqBody.position.x,
   y: -aux+40, z: -aux2-30}, velocidad )
-   var giroPalancaDerUp = new TWEEN.Tween( ejePalancaDer.rotation ).to( {x:0, y:0, z:-1.5}, velocidad )
+
    var giroPalancaIzqDown = new TWEEN.Tween( ejePalancaIzq.rotation ).to( {x:0, y:0, z:0}, velocidad )
-   var giroPalancaIzqDownFisico = new TWEEN.Tween( palancaIzqBody.quaternion ).to( quaternionInicial, velocidad )
-   var giroPalancaIzqDownPosicion = new TWEEN.Tween( palancaIzqBody.position ).to( posicionInicial, velocidad )
+   quatX.setFromAxisAngle(new CANNON.Vec3(1,0,0), -Math.PI/4);
+   quatZ.setFromAxisAngle(new CANNON.Vec3(0,0,1),-rotacionPalanca);
+   var quaternion = quatX.mult(quatZ);
+   quaternion.normalize();
+   var giroPalancaIzqDownPosicion = new TWEEN.Tween( palancaIzqBody.position ).to( {x: palancaIzqBody.position.x,
+    y: -aux, z: -aux2}, velocidad )
+  var giroPalancaIzqDownFisico = new TWEEN.Tween( palancaIzqBody.quaternion ).to( quaternion, velocidad )
+
+  var giroPalancaDerUp = new TWEEN.Tween( ejePalancaDer.rotation ).to( {x:0, y:0, z:-1.5}, velocidad )
+  var quatX = new CANNON.Quaternion();
+   var quatZ = new CANNON.Quaternion();
+   quatX.setFromAxisAngle(new CANNON.Vec3(1,0,0), -Math.PI/4);
+   quatZ.setFromAxisAngle(new CANNON.Vec3(0,0,1),-rotacionPalanca);
+   var quaternion = quatX.mult(quatZ);
+   quaternion.normalize();
+   var aux = Math.sin(-Math.PI * 0.25) * -215;
+   var aux2 = Math.cos(-Math.PI * 0.25) * -215;
+   var giroPalancaDerUpFisico = new TWEEN.Tween( palancaDerBody.quaternion ).to( quaternion, velocidad )
+   var giroPalancaDerUpPosicion = new TWEEN.Tween( palancaDerBody.position ).to( {x:palancaDerBody.position.x,
+  y: -aux+40, z: -aux2-30}, velocidad )
+
    var giroPalancaDerDown = new TWEEN.Tween( ejePalancaDer.rotation ).to( {x:0, y:0, z:0}, velocidad )
+
+   quatX.setFromAxisAngle(new CANNON.Vec3(1,0,0), -Math.PI/4);
+   quatZ.setFromAxisAngle(new CANNON.Vec3(0,0,1),rotacionPalanca);
+   var quaternion = quatX.mult(quatZ);
+   quaternion.normalize();
+   var giroPalancaDerDownPosicion = new TWEEN.Tween( palancaDerBody.position ).to( {x: palancaDerBody.position.x,
+    y: -aux, z: -aux2}, velocidad )
+  var giroPalancaDerDownFisico = new TWEEN.Tween( palancaDerBody.quaternion ).to( quaternion, velocidad )
 
    //Eventos de teclado
    keyboard = new THREEx.KeyboardState(renderer.domElement);  
@@ -624,13 +654,13 @@ function initPhysicWorld() {
 		}
 		if ( keyboard.eventMatches(event, 'left') ){
       giroPalancaIzqUp.start()  
-      console.log(palancaIzq.quaternion)
       giroPalancaIzqUpFisico.start()
       giroPalancaIzqUpPosicion.start()
 		}
 		if ( keyboard.eventMatches(event, 'right') ){
-      console.log(posicionInicial)
-      giroPalancaDerUp.start()   
+      giroPalancaDerUp.start()
+      giroPalancaDerUpFisico.start()
+      giroPalancaDerUpPosicion.start()
 		}
   })
   
@@ -642,10 +672,11 @@ function initPhysicWorld() {
       giroPalancaIzqDown.start() 
       giroPalancaIzqDownFisico.start()
       giroPalancaIzqDownPosicion.start()  
-      console.log(posicionInicial)
 		}
 		if ( keyboard.eventMatches(event, 'right') ){
-			giroPalancaDerDown.start()   
+      giroPalancaDerDown.start()
+      giroPalancaDerDownFisico.start()
+      giroPalancaDerDownPosicion.start()   
 		}
 	})
 
@@ -691,8 +722,9 @@ function initPhysicWorld() {
 
  function update(){
     var ahora = Date.now();							// Hora actual
-    var segundos = reloj.getDelta();	// tiempo en segundos que ha pasado
-	  world.step( segundos);				// recalcula el mundo tras ese tiempo
+    var segundos = reloj.getDelta();
+    //console.log(segundos)	// tiempo en segundos que ha pasado
+	  world.step( 15/60);				// recalcula el mundo tras ese tiempo
     //Actualizar interpoladores
     bola.visual.position.copy( bola.body.position )
     helper.update()
