@@ -208,7 +208,7 @@ function initPhysicWorld() {
 
     var aux = Math.sin(-Math.PI * 0.25) * 350;
     var aux2 = Math.cos(-Math.PI * 0.25) * 350;
-    bola = new esfera(12,new CANNON.Vec3(-10,aux2,aux +50),"sphereMaterial")
+    bola = new esfera(10,new CANNON.Vec3(-10,aux2,aux +50),"sphereMaterial")
     helper.addVisual(bola.body)
     world.addBody(bola.body)
     scene.add(bola.visual)
@@ -245,7 +245,7 @@ function initPhysicWorld() {
     star.position.set(0,0,0);
     star.quaternion.setFromAxisAngle(new CANNON.Vec3(1,0,0), -Math.PI/4);
     world.addBody(star)
-
+    helper.addVisual(star)
     //PALANCA Física
 
     var aux = -Math.sin(-Math.PI * 0.25) * (-215);
