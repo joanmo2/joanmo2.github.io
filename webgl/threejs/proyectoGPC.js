@@ -1,10 +1,12 @@
 /** 
- * Seminario GPC #3. FormaBasica
- * Dibujar formas basicas con animacion 
+ * Proyecto final GPC
+ * Pinball interactivo usando CANNON 
  */
 
  // Variables imprescindibles
  var renderer, scene, camera;
+ var movePalDer = false;
+ var movePalIzq = false;
 
  // Variables locales
  var car = new THREE.Object3D();;
@@ -15,6 +17,7 @@
  var cameraControler;
  var planta;
 
+
  // Mundo fisico
 var world, reloj,physics,ground;
 
@@ -23,16 +26,21 @@ var bola,rebotePalancaDerBody,helper;
 //Materiales
 var groundMaterial,materialEsfera,materialEstrella;
 var total = Math.cos(Math.PI * 0.25) * 250;
+var palancaDer, palancaIzq;
 
 
  //Var eje palanca
  var ejePalancaDer,pointToRotateAround;
  var rotacionPalanca = Math.PI * 0.23;
+ var posXder,posYder,posZder;
+ var posXizq,pozYizq,posZizq;
 
  //Objetos y variables de tiempo
  var antes = Date.now();
  var keyboard;
- var updateFcts	= [];
+
+ var acumDer = rotacionPalanca;
+ var acumIzq = -rotacionPalanca;
 
 
  // Acciones
@@ -44,7 +52,7 @@ var total = Math.cos(Math.PI * 0.25) * 250;
 
 
  function esfera( radio, posicion, material ){
-	var masa = 10;
+	var masa = 1;
 	this.body = new CANNON.Body( {mass: masa, material: material} );
 	this.body.addShape( new CANNON.Sphere( radio ) );
   this.body.position.copy( posicion );
@@ -80,23 +88,21 @@ var total = Math.cos(Math.PI * 0.25) * 250;
 
 function setCameras(ar){
     origen = new THREE.Vector3(200,500,200)
-
-    if(ar>1){
-        //planta = new THREE.OrthographicCamera(l*ar, r*ar, t, b, -20, 300);
-    }else{
-        //planta = new THREE.OrthographicCamera(l, r, t/ar, b/ar, -20, 300);
-    }
-    //planta.position.set(0,200,0);
-    //planta.lookAt(origen);
-    //planta.up = new THREE.Vector3(0,0,-1);
-
     camera = new THREE.PerspectiveCamera( 50, ar, 0.1, 10000);
     camera.position.set(0,500,500);
     camera.lookAt(origen);
 
     scene.add(camera);
-    //scene.add(planta)
+}
 
+function bodiesAreInContact(bodyA, bodyB){
+  for(var i=0; i<world.contacts.length; i++){
+      var c = world.contacts[i];
+      if((c.bi === bodyA && c.bj === bodyB) || (c.bi === bodyB && c.bj === bodyA)){
+          return true;
+      }
+  }
+  return false;
 }
 
 /**
@@ -107,9 +113,8 @@ function initPhysicWorld() {
     // Mundo 
     world = new CANNON.World();
     world.broadphase = new CANNON.NaiveBroadphase() 
-    world.gravity.set(0,-100,0); 
-   	world.broadphase = new CANNON.NaiveBroadphase(); 
-    world.solver.iterations = 10; 
+    world.gravity.set(0,-250,0); 
+    world.solver.iterations = 50; 
     helper = new CannonHelper(scene,world)
 
     // Material y comportamiento
@@ -117,10 +122,12 @@ function initPhysicWorld() {
     materialEsfera = new CANNON.Material("sphereMaterial");
     materialEstrella = new CANNON.Material("starMaterial");
     materialPalanca = new CANNON.Material("palancaMaterial");
+    wallMaterial = new CANNON.Material("wallMaterial")
     world.addMaterial( materialEsfera );
     world.addMaterial( groundMaterial );
     world.addMaterial(materialEstrella);
     world.addMaterial(materialPalanca);
+    world.addMaterial(wallMaterial)
 
     var sphereGroundContactMaterial = new CANNON.ContactMaterial(groundMaterial,materialEsfera,
       { friction: 0.7, 
@@ -130,10 +137,14 @@ function initPhysicWorld() {
         restitution: 20.0});
     var spherePalancaContactMaterial = new CANNON.ContactMaterial(materialEsfera,materialEstrella,
       { friction: 0.7, 
-        restitution: 200.0});
+        restitution: 1.0});
+    var sphereWallContactMaterial = new CANNON.ContactMaterial(materialEsfera,wallMaterial,
+      { friction:10, 
+        restitution: 100});
     world.addContactMaterial(sphereGroundContactMaterial);
     world.addContactMaterial(sphereStarContactMaterial);
     world.addContactMaterial(spherePalancaContactMaterial);
+    world.addContactMaterial(sphereWallContactMaterial);
 
     //Suelo
     var groundShape = new CANNON.Box(new CANNON.Vec3(350,350,1));
@@ -208,18 +219,18 @@ function initPhysicWorld() {
 
     var aux = Math.sin(-Math.PI * 0.25) * 350;
     var aux2 = Math.cos(-Math.PI * 0.25) * 350;
-    bola = new esfera(10,new CANNON.Vec3(-10,aux2,aux +50),"sphereMaterial")
+    bola = new esfera(15,new CANNON.Vec3(+10,aux2,aux +50),"sphereMaterial")
     helper.addVisual(bola.body)
     world.addBody(bola.body)
     scene.add(bola.visual)
 
     //Palancas
-    var palancaIzq = new THREE.Mesh(geopalancaround,material)
+    palancaIzq = new THREE.Mesh(geopalancaround,material)
     palancaIzq.position.x += 30;
     palancaIzq.position.y -= 30;
     palancaIzq.position.z += 10;
     palancaIzq.rotation.z -= rotacionPalanca;
-    var palancaDer = new THREE.Mesh(geopalancaround,material)
+    palancaDer = new THREE.Mesh(geopalancaround,material)
     palancaDer.position.x -= 30;
     palancaDer.position.y -= 30;
     palancaDer.position.z += 10;
@@ -270,7 +281,7 @@ function initPhysicWorld() {
     helper.addVisual(palancaIzqBody)
     //console.log(ejePalancaIzq.position)
 
-    var palancaDerShape = new CANNON.Box(new CANNON.Vec3(85/2, 8/2, 20))
+    var palancaDerShape = new CANNON.Box(new CANNON.Vec3(85/2, 8/2, 40/2))
     palancaDerBody = new CANNON.Body({ mass: 0, material: materialPalanca ,type: CANNON.Body.KINEMATIC,
     })
     palancaDerBody.addShape(palancaDerShape)
@@ -306,7 +317,7 @@ function initPhysicWorld() {
     var aux = -Math.sin(-Math.PI * 0.25) * (-165);
     var aux2 = Math.cos(-Math.PI * 0.25) * (-165);
 
-    var cubrePalancaShape = new CANNON.Box(new CANNON.Vec3(85/2, 8/2, 20))
+    var cubrePalancaShape = new CANNON.Box(new CANNON.Vec3(85/2, 8/2, 40/2))
     cubrePalancaBody = new CANNON.Body({ mass: 0, material: materialEstrella })
     cubrePalancaBody.addShape(cubrePalancaShape)
     cubrePalancaBody.position.set(cubrePalancaDer.position.x,aux,-(aux2)) 
@@ -378,6 +389,8 @@ function initPhysicWorld() {
     world.addBody( paredCubrePalancaIzqBody)
     helper.addVisual( paredCubrePalancaIzqBody)
     helper.addVisual( paredCubrePalancaDerBody)
+
+
 
 
     
@@ -543,13 +556,53 @@ function initPhysicWorld() {
    paredIzq.position.x = -180
    paredIzq.position.y = 75
    paredIzq.rotation.y = Math.PI/2
-   //plano.add(paredIzq)
 
    var paredDer = new THREE.Mesh(geopared,material)
    paredDer.position.x = 180
    paredDer.position.y = 75
    paredDer.rotation.y = Math.PI/2
    //plano.add(paredDer)
+
+   var paredShape = new CANNON.Box(new CANNON.Vec3(700, 2, 500))
+
+   topeBody = new CANNON.Body({ mass: 0, material: wallMaterial })
+   topeBody.addShape(paredShape)
+   topeBody.position.set(0,200,-250) 
+   var quatX = new CANNON.Quaternion();
+   var quatY = new CANNON.Quaternion();
+   quatX.setFromAxisAngle(new CANNON.Vec3(1,0,0), -Math.PI/4);
+   quatZ.setFromAxisAngle(new CANNON.Vec3(0,0,1),Math.PI);
+   var quaternion = quatX.mult(quatZ);
+   quaternion.normalize();
+   topeBody.quaternion.copy(quaternion)
+   world.addBody( topeBody)
+   helper.addVisual(topeBody)
+
+   paredIzqBody = new CANNON.Body({ mass: 0, material: wallMaterial })
+   paredIzqBody.addShape(paredShape)
+   paredIzqBody.position.set(paredIzq.position.x,0,0) 
+   var quatX = new CANNON.Quaternion();
+   var quatY = new CANNON.Quaternion();
+   quatX.setFromAxisAngle(new CANNON.Vec3(1,0,0), Math.PI/2);
+   quatY.setFromAxisAngle(new CANNON.Vec3(0,0,1),Math.PI/2);
+   var quaternion = quatX.mult(quatY);
+   quaternion.normalize();
+   paredIzqBody.quaternion.copy(quaternion)
+   world.addBody( paredIzqBody)
+   //helper.addVisual(paredIzqBody)
+
+   paredDerBody = new CANNON.Body({ mass: 0, material: wallMaterial })
+   paredDerBody.addShape(paredShape)
+   paredDerBody.position.set(paredDer.position.x,0,0) 
+   var quatX = new CANNON.Quaternion();
+   var quatY = new CANNON.Quaternion();
+   quatX.setFromAxisAngle(new CANNON.Vec3(1,0,0), Math.PI/2);
+   quatY.setFromAxisAngle(new CANNON.Vec3(0,0,1),Math.PI/2);
+   var quaternion = quatX.mult(quatY);
+   quaternion.normalize();
+   paredDerBody.quaternion.copy(quaternion)
+   world.addBody( paredDerBody)
+   //helper.addVisual(paredDerBody)
 
    var limites = new THREE.Object3D()
    limites.position.y = -80
@@ -594,89 +647,35 @@ function initPhysicWorld() {
     //console.log(palancaIzqBody.quaternion)
 
    //Movimiento para las palancas
-    velocidad = 40
-    posicionInicial = palancaIzqBody.position
-    quaternionInicial = palancaIzqBody.quaternion
-    //console.log(posicionInicial)
-   var quatX = new CANNON.Quaternion();
-   var quatZ = new CANNON.Quaternion();
-   quatX.setFromAxisAngle(new CANNON.Vec3(1,0,0), -Math.PI/4);
-   quatZ.setFromAxisAngle(new CANNON.Vec3(0,0,1),rotacionPalanca);
-   var quaternion = quatX.mult(quatZ);
-   quaternion.normalize();
-   var aux = Math.sin(-Math.PI * 0.25) * -215;
-   var aux2 = Math.cos(-Math.PI * 0.25) * -215;
-   var giroPalancaIzqUp = new TWEEN.Tween( ejePalancaIzq.rotation ).to( {x:0, y:0, z:1.5}, velocidad )
-   var giroPalancaIzqUpFisico = new TWEEN.Tween( palancaIzqBody.quaternion ).to( quaternion, velocidad )
-   var giroPalancaIzqUpPosicion = new TWEEN.Tween( palancaIzqBody.position ).to( {x:palancaIzqBody.position.x,
-  y: -aux+40, z: -aux2-30}, velocidad )
-
-   var giroPalancaIzqDown = new TWEEN.Tween( ejePalancaIzq.rotation ).to( {x:0, y:0, z:0}, velocidad )
-   quatX.setFromAxisAngle(new CANNON.Vec3(1,0,0), -Math.PI/4);
-   quatZ.setFromAxisAngle(new CANNON.Vec3(0,0,1),-rotacionPalanca);
-   var quaternion = quatX.mult(quatZ);
-   quaternion.normalize();
-   var giroPalancaIzqDownPosicion = new TWEEN.Tween( palancaIzqBody.position ).to( {x: palancaIzqBody.position.x,
-    y: -aux, z: -aux2}, velocidad )
-  var giroPalancaIzqDownFisico = new TWEEN.Tween( palancaIzqBody.quaternion ).to( quaternion, velocidad )
-
-  var giroPalancaDerUp = new TWEEN.Tween( ejePalancaDer.rotation ).to( {x:0, y:0, z:-1.5}, velocidad )
-  var quatX = new CANNON.Quaternion();
-   var quatZ = new CANNON.Quaternion();
-   quatX.setFromAxisAngle(new CANNON.Vec3(1,0,0), -Math.PI/4);
-   quatZ.setFromAxisAngle(new CANNON.Vec3(0,0,1),-rotacionPalanca);
-   var quaternion = quatX.mult(quatZ);
-   quaternion.normalize();
-   var aux = Math.sin(-Math.PI * 0.25) * -215;
-   var aux2 = Math.cos(-Math.PI * 0.25) * -215;
-   var giroPalancaDerUpFisico = new TWEEN.Tween( palancaDerBody.quaternion ).to( quaternion, velocidad )
-   var giroPalancaDerUpPosicion = new TWEEN.Tween( palancaDerBody.position ).to( {x:palancaDerBody.position.x,
-  y: -aux+40, z: -aux2-30}, velocidad )
-
-   var giroPalancaDerDown = new TWEEN.Tween( ejePalancaDer.rotation ).to( {x:0, y:0, z:0}, velocidad )
-
-   quatX.setFromAxisAngle(new CANNON.Vec3(1,0,0), -Math.PI/4);
-   quatZ.setFromAxisAngle(new CANNON.Vec3(0,0,1),rotacionPalanca);
-   var quaternion = quatX.mult(quatZ);
-   quaternion.normalize();
-   var giroPalancaDerDownPosicion = new TWEEN.Tween( palancaDerBody.position ).to( {x: palancaDerBody.position.x,
-    y: -aux, z: -aux2}, velocidad )
-  var giroPalancaDerDownFisico = new TWEEN.Tween( palancaDerBody.quaternion ).to( quaternion, velocidad )
-
+  
    //Eventos de teclado
    keyboard = new THREEx.KeyboardState(renderer.domElement);  
    renderer.domElement.setAttribute("tabIndex", "0");
    renderer.domElement.focus();  
+   acumDer = rotacionPalanca;
+   posXder = palancaDerBody.position.x;
+   posYder = palancaDerBody.position.y;
+   posZder = palancaDerBody.position.z;
+
+   posXizq = palancaIzqBody.position.x;
+   posYizq = palancaIzqBody.position.y;
+   posZizq = palancaIzqBody.position.z;
 
    keyboard.domElement.addEventListener('keydown', function(event){
-		if (event.repeat) {
-			return;
-		}
 		if ( keyboard.eventMatches(event, 'left') ){
-      giroPalancaIzqUp.start()  
-      giroPalancaIzqUpFisico.start()
-      giroPalancaIzqUpPosicion.start()
+      movePalIzq = true;
 		}
 		if ( keyboard.eventMatches(event, 'right') ){
-      giroPalancaDerUp.start()
-      giroPalancaDerUpFisico.start()
-      giroPalancaDerUpPosicion.start()
-		}
+      movePalDer = true;
+    }
   })
   
   keyboard.domElement.addEventListener('keyup', function(event){
-		if (event.repeat) {
-			return;
-		}
 		if ( keyboard.eventMatches(event, 'left') ){
-      giroPalancaIzqDown.start() 
-      giroPalancaIzqDownFisico.start()
-      giroPalancaIzqDownPosicion.start()  
+      movePalIzq = false; 
 		}
 		if ( keyboard.eventMatches(event, 'right') ){
-      giroPalancaDerDown.start()
-      giroPalancaDerDownFisico.start()
-      giroPalancaDerDownPosicion.start()   
+      movePalDer = false;
 		}
 	})
 
@@ -723,12 +722,83 @@ function initPhysicWorld() {
  function update(){
     var ahora = Date.now();							// Hora actual
     var segundos = reloj.getDelta();
-    //console.log(segundos)	// tiempo en segundos que ha pasado
-	  world.step(segundos);				// recalcula el mundo tras ese tiempo
     //Actualizar interpoladores
+    if(movePalDer){
+      console.log("Moviendo arriba derecha")
+      if(acumDer >= -0.4){
+        if(bodiesAreInContact(bola.body,palancaDerBody)){
+          console.log("in")
+          bola.body.applyImpulse(new CANNON.Vec3(0,200,-200),bola.body.position)
+          bola.visual.position.copy( bola.body.position )
+        }
+        palancaDerBody.position.set(posXder,posYder+6,posZder -4.5) 
+        var quatX = new CANNON.Quaternion();
+        var quatZ = new CANNON.Quaternion();
+        quatX.setFromAxisAngle(new CANNON.Vec3(1,0,0), -Math.PI/4);
+        quatZ.setFromAxisAngle(new CANNON.Vec3(0,0,1), acumDer-0.2);
+        var quaternion = quatX.mult(quatZ);
+        quaternion.normalize();
+        palancaDerBody.quaternion.copy(quaternion)
+        acumDer -= 0.2
+        posYder += 6
+        posZder -= 4.5
+        palancaDer.position.copy(palancaDerBody)
+        bola.visual.position.copy( bola.body.position )
+        }
+    }else{
+      if(acumDer < rotacionPalanca-0.1){
+        palancaDerBody.position.set(posXder,posYder-6,posZder +4.25) 
+        var quatX = new CANNON.Quaternion();
+        var quatZ = new CANNON.Quaternion();
+        quatX.setFromAxisAngle(new CANNON.Vec3(1,0,0), -Math.PI/4);
+        quatZ.setFromAxisAngle(new CANNON.Vec3(0,0,1), acumDer+0.2);
+        var quaternion = quatX.mult(quatZ);
+        quaternion.normalize();
+        palancaDerBody.quaternion.copy(quaternion)
+        acumDer += 0.2
+        posYder -= 6
+        posZder += 4.5
+        palancaDer.position.copy(palancaDerBody)
+      }
+    }
+    if(movePalIzq){
+      if(acumIzq <= 0.4){
+        if(bodiesAreInContact(bola.body,palancaIzqBody)){
+          bola.body.applyImpulse(new CANNON.Vec3(0,200,-200),bola.body.position)
+          bola.visual.position.copy( bola.body.position )
+        }
+        palancaIzqBody.position.set(posXizq,posYizq+6,posZizq -4.5) 
+        var quatX = new CANNON.Quaternion();
+        var quatZ = new CANNON.Quaternion();
+        quatX.setFromAxisAngle(new CANNON.Vec3(1,0,0), -Math.PI/4);
+        quatZ.setFromAxisAngle(new CANNON.Vec3(0,0,1), acumIzq+0.2);
+        var quaternion = quatX.mult(quatZ);
+        quaternion.normalize();
+        palancaIzqBody.quaternion.copy(quaternion)
+        acumIzq += 0.2
+        posYizq += 6
+        posZizq -= 4.5
+        palancaIzq.position.copy(palancaIzqBody)
+      }
+    }else{
+      if(acumIzq > -rotacionPalanca+0.1){
+        palancaIzqBody.position.set(posXizq,posYizq-6,posZizq +4.5) 
+        var quatX = new CANNON.Quaternion();
+        var quatZ = new CANNON.Quaternion();
+        quatX.setFromAxisAngle(new CANNON.Vec3(1,0,0), -Math.PI/4);
+        quatZ.setFromAxisAngle(new CANNON.Vec3(0,0,1), acumIzq-0.2);
+        var quaternion = quatX.mult(quatZ);
+        quaternion.normalize();
+        palancaIzqBody.quaternion.copy(quaternion)
+        acumIzq -= 0.2
+        posYizq -= 6
+        posZizq += 4.5
+        palancaIzq.position.copy(palancaIzqBody)
+      }
+    }
+    world.step(1/50,segundos,10);				// recalcula el mundo tras ese tiempo
     bola.visual.position.copy( bola.body.position )
     helper.update()
-    TWEEN.update()
 	  antes = ahora;
  }
  
