@@ -52,7 +52,7 @@ var palancaDer, palancaIzq;
 
 
  function esfera( radio, posicion, material ){
-	var masa = 2;
+	var masa = 1;
 	this.body = new CANNON.Body( {mass: masa, material: material} );
 	this.body.addShape( new CANNON.Sphere( radio ) );
   this.body.position.copy( posicion );
@@ -815,7 +815,7 @@ function initPhysicWorld() {
         palancaDer.position.copy(palancaDerBody)
         if(bodiesAreInContact(bola.body,palancaDerBody)){
           console.log("in")
-          bola.body.applyImpulse(new CANNON.Vec3(0,400,-400),bola.body.position)
+          bola.body.applyImpulse(new CANNON.Vec3(0,200,-200),bola.body.position)
           bola.visual.position.copy( bola.body.position )
         }
         bola.visual.position.copy( bola.body.position )
@@ -852,7 +852,7 @@ function initPhysicWorld() {
         posZizq -= 4.5
         palancaIzq.position.copy(palancaIzqBody)
         if(bodiesAreInContact(bola.body,palancaIzqBody)){
-          bola.body.applyImpulse(new CANNON.Vec3(0,400,-400),bola.body.position)
+          bola.body.applyImpulse(new CANNON.Vec3(0,200,-200),bola.body.position)
           bola.visual.position.copy( bola.body.position )
         }
       }
