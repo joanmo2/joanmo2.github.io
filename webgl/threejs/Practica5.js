@@ -44,7 +44,7 @@ function setCameras(ar){
     planta.up = new THREE.Vector3(0,0,-1);
 
     camera = new THREE.PerspectiveCamera( 50, ar, 0.1, 10000);
-    camera.position.set(300,300,300);
+    camera.position.set(400,400,400);
     camera.lookAt(origen);
 
     scene.add(camera);
@@ -59,6 +59,7 @@ function setCameras(ar){
     renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth,window.innerHeight);
     renderer.setClearColor(new THREE.Color(0xFFFFFF));
+    renderer.shadowMap.enabled = true;
     renderer.autoClear = false;
     document.getElementById("container").appendChild(renderer.domElement);
 
@@ -69,23 +70,68 @@ function setCameras(ar){
     var ar = window.innerWidth / innerHeight;
     setCameras(ar)
 
-
-
     //Controlador de camara
     cameraControler = new THREE.OrbitControls(camera, renderer.domElement)
     cameraControler.target.set(0,0,0)
     cameraControler.noKeys = true;
 
-    //teclado
+    // Luces
+	var luzAmbiente = new THREE.AmbientLight(0xFFFFFF, 0.2);
+	scene.add( luzAmbiente );
+
+	var luzPuntual = new THREE.PointLight(0xFFFFFF,0.5);
+	luzPuntual.position.set( -0, 20, -0 );
+	scene.add( luzPuntual );
+
+	var luzDireccional = new THREE.DirectionalLight(0xFFFFFF,0.5);
+	luzDireccional.position.set(-100,50,100 );
+	scene.add(luzDireccional);
+
+	var luzFocal = new THREE.SpotLight(0xFFFFFF,0.5);
+	luzFocal.position.set( 500,450,20 );
+	luzFocal.target.position.set(0,0,0);
+	luzFocal.angle = Math.PI/10;
+	luzFocal.penumbra = 0.2;
+    luzFocal.castShadow = true;
+    luzFocal.shadow.camera.near = 50;
+    luzFocal.shadow.camera.far = 50000;
+    luzFocal.shadow.camera.fov = 50;
+	scene.add(luzFocal);
 
  }
 
 
  function loadScene(){
-   // Cargar la escena con objetos
+    // Cargar la escena con objetos
+
+    // Texturas
+	var path = "images/";
+    var texturaSuelo = new THREE.TextureLoader().load(path+'pisometalico_1024.jpg');
+    
+	texturaSuelo.magFilter = THREE.LinearFilter;
+	texturaSuelo.minFilter = THREE.LinearFilter;
+	texturaSuelo.repeat.set(1,1);
+    texturaSuelo.wrapS = texturaSuelo.wrapT = THREE.MirroredRepeatWrapping;
+
+    var texturaPieRobot = new THREE.TextureLoader().load(path+'metalRobot.jpg');
+    var texturaOroRobot = new THREE.TextureLoader().load(path+'oroRobot.jpg');
+
+    var paredes = [ path+'posx.jpg',path+'negx.jpg',
+					path+'posy.jpg',path+'negy.jpg',
+					path+'posz.jpg',path+'negz.jpg'
+                  ];
+   var mapaEntorno = new THREE.CubeTextureLoader().load(paredes);
+   var materialBrillante = new THREE.MeshPhongMaterial({color:'white',
+		                                                 specular:'white',
+		                                                 shininess: 50,
+		                                                 envMap:mapaEntorno });
 
    // Materiales
-   var material = new THREE.MeshBasicMaterial({color:'red', wireframe:true});
+   var material = new THREE.MeshLambertMaterial({color:'red'});
+   var matsuelo = new THREE.MeshLambertMaterial({color:'white', map: texturaSuelo});
+   var matPieRobot = new THREE.MeshLambertMaterial({color:'white', map: texturaPieRobot});
+   var matOroRobot = new THREE.MeshPhongMaterial({color:'white', 
+   specular:'white',shininess: 50,map: texturaOroRobot});
 
    // Geometrias
    var geoplano = new THREE.PlaneGeometry(1000, 1000, 20, 20);
@@ -115,96 +161,125 @@ function setCameras(ar){
    )
 
    geometryPinza.faces.push(
-    //front
-    new THREE.Face3(0, 2, 1),
-    new THREE.Face3(0, 3, 2),
-    //izq
-    new THREE.Face3(0, 5, 1),
-    new THREE.Face3(0, 4, 5),
-    //top
-    new THREE.Face3(1, 6, 5),
-    new THREE.Face3(1, 2, 6),
-    //der
-    new THREE.Face3(2, 7, 6),
-    new THREE.Face3(2, 3, 7),
-    //bottom
-    new THREE.Face3(0, 4, 7),
-    new THREE.Face3(0, 7, 3),
-    //back
-    new THREE.Face3(4, 5, 6),
-    new THREE.Face3(4, 6, 7),
+      //front
+      new THREE.Face3(0, 2, 1),
+      new THREE.Face3(0, 3, 2),
+      //izq
+      new THREE.Face3(0, 5, 1),
+      new THREE.Face3(0, 4, 5),
+      //top
+      new THREE.Face3(1, 6, 5),
+      new THREE.Face3(1, 2, 6),
+      //der
+      new THREE.Face3(2, 7, 6),
+      new THREE.Face3(2, 3, 7),
+      //bottom
+      new THREE.Face3(0, 4, 7),
+      new THREE.Face3(0, 7, 3),
+      //back
+      new THREE.Face3(4, 5, 6),
+      new THREE.Face3(4, 6, 7),
 
-    //secondSquare
-    //front
-    new THREE.Face3(3, 8, 2),
-    new THREE.Face3(3, 9, 8),
-    //izq
-    new THREE.Face3(3,6,2),
-    new THREE.Face3(3,7,6),
-    //top
-    new THREE.Face3(2, 10, 6),
-    new THREE.Face3(2, 8, 10),
-    //der
-    new THREE.Face3(8, 11, 10),
-    new THREE.Face3(8, 9, 11),
-    //bottom
-    new THREE.Face3(3, 7, 11),
-    new THREE.Face3(3, 11, 9),
-    //back
-    new THREE.Face3(7, 6, 10),
-    new THREE.Face3(7, 10, 11),
-    
- )
+      //secondSquare
+      //front
+      new THREE.Face3(3, 8, 2),
+      new THREE.Face3(3, 9, 8),
+      //izq
+      new THREE.Face3(3,6,2),
+      new THREE.Face3(3,7,6),
+      //top
+      new THREE.Face3(2, 10, 6),
+      new THREE.Face3(2, 8, 10),
+      //der
+      new THREE.Face3(8, 11, 10),
+      new THREE.Face3(8, 9, 11),
+      //bottom
+      new THREE.Face3(3, 7, 11),
+      new THREE.Face3(3, 11, 9),
+      //back
+      new THREE.Face3(7, 6, 10),
+      new THREE.Face3(7, 10, 11),
+      
+   )
 
    // Objetos
    
 
    //Plano
-   plano = new THREE.Mesh(geoplano, material);
+   plano = new THREE.Mesh(geoplano, matsuelo);
    plano.rotation.x = -Math.PI * 0.5;
+   plano.receiveShadow = true;
 
    //Base
-   base = new THREE.Mesh(geocilindro,material);
+   base = new THREE.Mesh(geocilindro,matPieRobot);
    base.rotation.x = Math.PI * 0.5;
+   base.position.z +=10;
+   base.receiveShadow = true;
+   base.castShadow = true;
 
    //Brazo
-   pieDeBrazo = new THREE.Mesh(geocilindroGirado,material);
+   pieDeBrazo = new THREE.Mesh(geocilindroGirado,matPieRobot);
    pieDeBrazo.rotation.x = -Math.PI * 0.5;
+   pieDeBrazo.receiveShadow = true;
+   pieDeBrazo.castShadow = true;
 
-   nexo = new THREE.Mesh(geoCuboide, material);
+   nexo = new THREE.Mesh(geoCuboide, matPieRobot);
    nexo.rotation.y = Math.PI * 0.5;
    nexo.position.y += 60;
+   nexo.receiveShadow = true;
+   nexo.castShadow = true;
 
-   esfera = new THREE.Mesh(geoesfera,material);
+   esfera = new THREE.Mesh(geoesfera,materialBrillante);
    esfera.position.y += 120;
+   esfera.receiveShadow = true;
+   esfera.castShadow = true;
+
 
    brazoRobot = new THREE.Object3D();
 
    //Antebrazo
-   baseAntebrazo = new THREE.Mesh(geoBaseAntebrazo,material)
-   pilarAntebrazo1 = new THREE.Mesh(geoPilarAntebrazo,material)
+   baseAntebrazo = new THREE.Mesh(geoBaseAntebrazo,matOroRobot)
+   baseAntebrazo.receiveShadow = true;
+   baseAntebrazo.castShadow = true;
+
+   pilarAntebrazo1 = new THREE.Mesh(geoPilarAntebrazo,matOroRobot)
    pilarAntebrazo1.position.y += 40;
    pilarAntebrazo1.position.z = 8;
    pilarAntebrazo1.position.x = -8;
+   pilarAntebrazo1.receiveShadow = true;
+   pilarAntebrazo1.castShadow = true;
 
-   pilarAntebrazo2 = new THREE.Mesh(geoPilarAntebrazo,material)
+
+   pilarAntebrazo2 = new THREE.Mesh(geoPilarAntebrazo,matOroRobot)
    pilarAntebrazo2.position.y += 40;
    pilarAntebrazo2.position.z = 8;
    pilarAntebrazo2.position.x = 8;
+   pilarAntebrazo2.receiveShadow = true;
+   pilarAntebrazo2.castShadow = true;
 
-   pilarAntebrazo3 = new THREE.Mesh(geoPilarAntebrazo,material)
+
+   pilarAntebrazo3 = new THREE.Mesh(geoPilarAntebrazo,matOroRobot)
    pilarAntebrazo3.position.y += 40;
    pilarAntebrazo3.position.z = -8;
    pilarAntebrazo3.position.x = 8;
+   pilarAntebrazo3.receiveShadow = true;
+   pilarAntebrazo3.castShadow = true;
 
-   pilarAntebrazo4 = new THREE.Mesh(geoPilarAntebrazo,material)
+
+   pilarAntebrazo4 = new THREE.Mesh(geoPilarAntebrazo,matOroRobot)
    pilarAntebrazo4.position.y += 40;
    pilarAntebrazo4.position.z = -8;
    pilarAntebrazo4.position.x = -8;
+   pilarAntebrazo4.receiveShadow = true;
+   pilarAntebrazo4.castShadow = true;
 
-   cabezaAntebrazo = new THREE.Mesh(geoCabezaAntebrazo,material)
+
+   cabezaAntebrazo = new THREE.Mesh(geoCabezaAntebrazo,matOroRobot)
    cabezaAntebrazo.rotation.x += Math.PI * 0.5;
    cabezaAntebrazo.position.y = 80
+   cabezaAntebrazo.receiveShadow = true;
+   cabezaAntebrazo.castShadow = true;
+
 
    antebrazoRobot = new THREE.Object3D()
    antebrazoRobot.position.y = 120
@@ -212,10 +287,16 @@ function setCameras(ar){
    //pinza
    pinzaIzq = new THREE.Mesh(geometryPinza, material);
    pinzaIzq.position.z = +17
+   pinzaIzq.receiveShadow = true;
+   pinzaIzq.castShadow = true;
+
    pinzaDer = new THREE.Mesh(geometryPinza, material);
    pinzaDer.rotation.x += Math.PI ;
    pinzaDer.position.y += 20
    pinzaDer.position.z = -17
+   pinzaDer.receiveShadow = true;
+   pinzaDer.castShadow = true;
+
 
    pinzasRobot = new THREE.Object3D()
    pinzasRobot.position.z -= 10
@@ -251,13 +332,20 @@ function setCameras(ar){
 
 
 
-   // pieDeBrazo.add( new THREE.AxisHelper(60));
-   // nexo.add(new THREE.AxisHelper(30))
-   //scene.add( new THREE.AxisHelper(500));
-   //base.add(new THREE.AxisHelper(100))
-   //cabezaAntebrazo.add(new THREE.AxisHelper(100))
-   //nexo.add(esfera);
-   //antebrazoRobot.add(new THREE.AxisHelper(100))
+   // Habitacion
+	var shader = THREE.ShaderLib.cube;
+	shader.uniforms.tCube.value = mapaEntorno;
+
+	var matparedes = new THREE.ShaderMaterial({
+		fragmentShader: shader.fragmentShader,
+		vertexShader: shader.vertexShader,
+		uniforms: shader.uniforms,
+		dephtWrite: false,
+		side: THREE.BackSide
+	});
+
+	var habitacion = new THREE.Mesh( new THREE.CubeGeometry(1000,1000,1000),matparedes);
+	scene.add(habitacion);
 
    keyboard = new THREEx.KeyboardState(renderer.domElement);  
    renderer.domElement.setAttribute("tabIndex", "0");

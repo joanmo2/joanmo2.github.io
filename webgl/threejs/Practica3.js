@@ -105,46 +105,46 @@ function setCameras(ar){
    )
 
    geometryPinza.faces.push(
-      //front
-      new THREE.Face3(0, 2, 1),
-      new THREE.Face3(0, 3, 2),
-      //izq
-      new THREE.Face3(0, 5, 1),
-      new THREE.Face3(0, 4, 5),
-      //top
-      new THREE.Face3(1, 6, 5),
-      new THREE.Face3(1, 2, 6),
-      //der
-      new THREE.Face3(2, 7, 6),
-      new THREE.Face3(2, 3, 7),
-      //bottom
-      new THREE.Face3(0, 7, 4),
-      new THREE.Face3(0, 3, 7),
-      //back
-      new THREE.Face3(4, 6, 5),
-      new THREE.Face3(4, 7, 6),
+    //front
+    new THREE.Face3(0, 2, 1),
+    new THREE.Face3(0, 3, 2),
+    //izq
+    new THREE.Face3(0, 5, 1),
+    new THREE.Face3(0, 4, 5),
+    //top
+    new THREE.Face3(1, 6, 5),
+    new THREE.Face3(1, 2, 6),
+    //der
+    new THREE.Face3(2, 7, 6),
+    new THREE.Face3(2, 3, 7),
+    //bottom
+    new THREE.Face3(0, 4, 7),
+    new THREE.Face3(0, 7, 3),
+    //back
+    new THREE.Face3(4, 5, 6),
+    new THREE.Face3(4, 6, 7),
 
-      //secondSquare
-      //front
-      new THREE.Face3(3, 8, 2),
-      new THREE.Face3(3, 9, 8),
-      //izq
-      new THREE.Face3(3,6,2),
-      new THREE.Face3(3,7,6),
-      //top
-      new THREE.Face3(2, 10, 6),
-      new THREE.Face3(2, 8, 10),
-      //der
-      new THREE.Face3(8, 11, 10),
-      new THREE.Face3(8, 9, 11),
-      //bottom
-       new THREE.Face3(3, 8, 7),
-       new THREE.Face3(3,9,8),
-      //back
-      new THREE.Face3(7, 10, 6),
-      new THREE.Face3(7, 11, 10),
-      
-   )
+    //secondSquare
+    //front
+    new THREE.Face3(3, 8, 2),
+    new THREE.Face3(3, 9, 8),
+    //izq
+    new THREE.Face3(3,6,2),
+    new THREE.Face3(3,7,6),
+    //top
+    new THREE.Face3(2, 10, 6),
+    new THREE.Face3(2, 8, 10),
+    //der
+    new THREE.Face3(8, 11, 10),
+    new THREE.Face3(8, 9, 11),
+    //bottom
+    new THREE.Face3(3, 7, 11),
+    new THREE.Face3(3, 11, 9),
+    //back
+    new THREE.Face3(7, 6, 10),
+    new THREE.Face3(7, 10, 11),
+    
+ )
 
    // Objetos
    
@@ -156,6 +156,7 @@ function setCameras(ar){
    //Base
    base = new THREE.Mesh(geocilindro,material);
    base.rotation.x = Math.PI * 0.5;
+   base.position.z +=10;
 
    //Brazo
    pieDeBrazo = new THREE.Mesh(geocilindroGirado,material);

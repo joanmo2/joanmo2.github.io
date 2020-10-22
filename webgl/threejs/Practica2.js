@@ -84,11 +84,11 @@
       new THREE.Face3(2, 7, 6),
       new THREE.Face3(2, 3, 7),
       //bottom
-      new THREE.Face3(0, 7, 4),
-      new THREE.Face3(0, 3, 7),
+      new THREE.Face3(0, 4, 7),
+      new THREE.Face3(0, 7, 3),
       //back
-      new THREE.Face3(4, 6, 5),
-      new THREE.Face3(4, 7, 6),
+      new THREE.Face3(4, 5, 6),
+      new THREE.Face3(4, 6, 7),
 
       //secondSquare
       //front
@@ -104,11 +104,11 @@
       new THREE.Face3(8, 11, 10),
       new THREE.Face3(8, 9, 11),
       //bottom
-       new THREE.Face3(3, 8, 7),
-       new THREE.Face3(3,9,8),
+      new THREE.Face3(3, 7, 11),
+      new THREE.Face3(3, 11, 9),
       //back
-      new THREE.Face3(7, 10, 6),
-      new THREE.Face3(7, 11, 10),
+      new THREE.Face3(7, 6, 10),
+      new THREE.Face3(7, 10, 11),
       
    )
 
@@ -122,6 +122,7 @@
    //Base
    base = new THREE.Mesh(geocilindro,material);
    base.rotation.x = Math.PI * 0.5;
+   base.position.z +=10;
 
    //Brazo
    pieDeBrazo = new THREE.Mesh(geocilindroGirado,material);
