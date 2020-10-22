@@ -196,9 +196,19 @@ function initPhysicWorld() {
     cameraControler.target.set(0,0,0)
     cameraControler.noKeys = true;
 
+    // Luces
+	  var luzAmbiente = new THREE.AmbientLight(0xFFFFFF, 0.2);
+	  scene.add( luzAmbiente );
+
  }
 
   function loadScene(){
+    var path = "images/";
+    var paredes = [ path+'paredes/px.png',path+'paredes/nx.png',
+					path+'paredes/py.png',path+'paredes/ny.png',
+					path+'paredes/pz.png',path+'paredes/nz.png'
+	              ];
+	 var mapaEntorno = new THREE.CubeTextureLoader().load(paredes);
     //Materiales
     var material = new THREE.MeshBasicMaterial({color:'red', wireframe:true});
 
@@ -711,12 +721,27 @@ function initPhysicWorld() {
    plano.add(bolardoLateralIzquierda)
    plano.add(estrellaFondo)
 
+   // Habitacion
+	var shader = THREE.ShaderLib.cube;
+	shader.uniforms.tCube.value = mapaEntorno;
+
+	var matparedes = new THREE.ShaderMaterial({
+		fragmentShader: shader.fragmentShader,
+		vertexShader: shader.vertexShader,
+		uniforms: shader.uniforms,
+		dephtWrite: false,
+		side: THREE.BackSide
+	});
+
+	var habitacion = new THREE.Mesh( new THREE.CubeGeometry(2000,2000,2000),matparedes);
+	//scene.add(habitacion);
+
    //plano.add(topePista)
    //plano.add(THREE.AxisHelper(300))
    //palancaRounded.add(THREE.AxisHelper(300))
    //scene.add( THREE.AxisHelper(300)); 
 
-
+ 
     //console.log(palancaIzq.quaternion)
     //console.log(palancaIzqBody.quaternion)
 
