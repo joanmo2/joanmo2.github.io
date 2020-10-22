@@ -33,7 +33,6 @@
 
 function setCameras(ar){
     origen = new THREE.Vector3(0,0,0)
-
     if(ar>1){
         planta = new THREE.OrthographicCamera(l*ar, r*ar, t, b, -20, 300);
     }else{
@@ -43,7 +42,7 @@ function setCameras(ar){
     planta.lookAt(origen);
     planta.up = new THREE.Vector3(0,0,-1);
 
-    camera = new THREE.PerspectiveCamera( 50, ar, 0.1, 10000);
+    camera = new THREE.PerspectiveCamera( 55, ar, 0.1, 10000);
     camera.position.set(400,400,400);
     camera.lookAt(origen);
 
@@ -93,9 +92,9 @@ function setCameras(ar){
 	luzFocal.angle = Math.PI/10;
 	luzFocal.penumbra = 0.2;
     luzFocal.castShadow = true;
-    luzFocal.shadow.camera.near = 50;
+    luzFocal.shadow.camera.near = 0.1;
     luzFocal.shadow.camera.far = 50000;
-    luzFocal.shadow.camera.fov = 50;
+    luzFocal.shadow.camera.fov = 50000;
 	scene.add(luzFocal);
 
  }
