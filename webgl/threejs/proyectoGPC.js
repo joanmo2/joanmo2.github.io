@@ -454,7 +454,7 @@ function initPhysicWorld() {
     //Rebotes de la parte superior
     var reboteLargoIzq = new THREE.Mesh(georebotelargo,materialOro);
     reboteLargoIzq.position.x += 90;
-    reboteLargoIzq.position.y += 100;
+    reboteLargoIzq.position.y += 90;
     reboteLargoIzq.position.z += 10;
     reboteLargoIzq.rotation.z -= Math.PI * 0.25;
 
@@ -478,7 +478,7 @@ function initPhysicWorld() {
 
     var reboteLargoDer = new THREE.Mesh(georebotelargo,materialOro);
     reboteLargoDer.position.x -= 90;
-    reboteLargoDer.position.y += 100;
+    reboteLargoDer.position.y += 90;
     reboteLargoDer.position.z += 10;
     reboteLargoDer.rotation.z += Math.PI * 0.25;
 
@@ -521,7 +521,7 @@ function initPhysicWorld() {
 
     var reboteCortoIzq2 = new THREE.Mesh(georebotecorto,materialOro)
     reboteCortoIzq2.position.x -= 80;
-    reboteCortoIzq2.position.y += 190;
+    reboteCortoIzq2.position.y += 200;
     reboteCortoIzq2.position.z += 10;
     reboteCortoIzq2.rotation.z += Math.PI * 0.25;
 
@@ -565,7 +565,7 @@ function initPhysicWorld() {
 
     var reboteCortoDer2 = new THREE.Mesh(georebotecorto,materialOro)
     reboteCortoDer2.position.x += 80;
-    reboteCortoDer2.position.y += 190;
+    reboteCortoDer2.position.y += 200;
     reboteCortoDer2.position.z += 10;
     reboteCortoDer2.rotation.z -= Math.PI * 0.25;
 
@@ -650,7 +650,7 @@ function initPhysicWorld() {
 
     //Bolardos laterales
     var bolardoLateralDerecha = new THREE.Mesh(geocilindroBolardo,materialNeptune)
-    bolardoLateralDerecha.position.x = reboteCortoDer1.position.x + 55
+    bolardoLateralDerecha.position.x = reboteCortoDer1.position.x + 60
     bolardoLateralDerecha.position.y = reboteCortoDer1.position.y
     bolardoLateralDerecha.position.z += 10
     bolardoLateralDerecha.rotation.x = Math.PI/2
@@ -667,7 +667,7 @@ function initPhysicWorld() {
 
 
     var bolardoLateralIzquierda = new THREE.Mesh(geocilindroBolardo,materialNeptune)
-    bolardoLateralIzquierda.position.x = reboteCortoIzq1.position.x - 55
+    bolardoLateralIzquierda.position.x = reboteCortoIzq1.position.x - 60
     bolardoLateralIzquierda.position.y = reboteCortoIzq1.position.y
     bolardoLateralIzquierda.position.z += 10
     bolardoLateralIzquierda.rotation.x = Math.PI/2
@@ -948,7 +948,6 @@ function initPhysicWorld() {
         palancaIzq.position.set(palancaIzq.position.x,palancaIzq.position.y-7,palancaIzq.position.z+.5)
     }
   }
-    //world.step(1/50,segundos,10);				// recalcula el mundo tras ese tiempo      
     if(bodiesAreInContact(bola.body,paredDerBody)){
       bola.body.applyImpulse(new CANNON.Vec3(-75,0,0),bola.body.position)
     }else if(bodiesAreInContact(bola.body,paredIzqBody)){
@@ -957,7 +956,8 @@ function initPhysicWorld() {
     if(bola.body.position.y< -300){
       var aux = Math.sin(-Math.PI * 0.25) * 350;
       var aux2 = Math.cos(-Math.PI * 0.25) * 350;
-      bola.body.position.copy(new CANNON.Vec3(10,aux2-25,aux +50))
+      px = Math.floor(Math.random() * 100)-50;
+      bola.body.position.copy(new CANNON.Vec3(px,aux2-25,aux +50))
       bola.body.velocity.set(0,0,0)
     }
     bola.visual.position.copy( bola.body.position)
