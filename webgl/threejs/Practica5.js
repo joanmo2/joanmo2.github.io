@@ -89,12 +89,12 @@ function setCameras(ar){
 	var luzFocal = new THREE.SpotLight(0xFFFFFF,0.5);
 	luzFocal.position.set( 500,450,20 );
 	luzFocal.target.position.set(0,0,0);
-	luzFocal.angle = Math.PI/10;
+	luzFocal.angle = Math.PI/5;
 	luzFocal.penumbra = 0.2;
     luzFocal.castShadow = true;
     luzFocal.shadow.camera.near = 0.1;
-    luzFocal.shadow.camera.far = 50000;
-    luzFocal.shadow.camera.fov = 50000;
+    luzFocal.shadow.camera.far = 5000;
+    luzFocal.shadow.camera.fov = 5000;
 	scene.add(luzFocal);
 
  }

@@ -172,8 +172,19 @@ function initPhysicWorld() {
     cameraControler.noKeys = true;
 
     // Luces
-	  var luzAmbiente = new THREE.AmbientLight(0xFFFFFF, 0.7);
-	  scene.add( luzAmbiente );
+	  var luzAmbiente = new THREE.AmbientLight(0xFFFFFF, 0.4);
+    //scene.add( luzAmbiente );
+    
+    var luzFocal = new THREE.SpotLight(0xFFFFFF,0.9);
+	  luzFocal.position.set( 1000,1000,1000 );
+	  luzFocal.target.position.set(0,0,0);
+	  luzFocal.angle = Math.PI/5;
+	  luzFocal.penumbra = 0.2;
+    luzFocal.castShadow = true;
+    luzFocal.shadow.camera.near = 0.1;
+    luzFocal.shadow.camera.far = 50000;
+    luzFocal.shadow.camera.fov = 50000;
+	  scene.add(luzFocal);
 
  }
 
@@ -223,11 +234,15 @@ function initPhysicWorld() {
     var plano = new THREE.Mesh(geoplano, matsuelo);
     plano.rotation.x = -Math.PI * 0.25;
     plano.position.y = 0
+    plano.receiveShadow = true;
+
     //plano.add(new THREE.AxisHelper(300))
 
     var aux = Math.sin(-Math.PI * 0.25) * 350;
     var aux2 = Math.cos(-Math.PI * 0.25) * 350;
     bola = new esfera(13,new CANNON.Vec3(1,aux2-25,aux +50),"sphereMaterial", matTierra)
+    bola.receiveShadow = true;
+    bola.castShadow = true;
     //helper.addVisual(bola.body)
     world.addBody(bola.body)
     scene.add(bola.visual)
