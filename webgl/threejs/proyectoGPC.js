@@ -63,7 +63,7 @@ var palancaDer, palancaIzq;
 function setCameras(ar){
     origen = new THREE.Vector3(200,500,200)
     camera = new THREE.PerspectiveCamera( 50, ar, 0.1, 10000);
-    camera.position.set(0,500,500);
+    camera.position.set(0,600,600);
     camera.lookAt(origen);
 
     scene.add(camera);
@@ -109,9 +109,9 @@ function initPhysicWorld() {
     var sphereStarContactMaterial = new CANNON.ContactMaterial(materialEsfera,materialEstrella,
       { friction: 0.1, 
         restitution: 20.0});
-    var spherePalancaContactMaterial = new CANNON.ContactMaterial(materialEsfera,materialEstrella,
-      { friction: 0.7, 
-        restitution: 1.0});
+    var spherePalancaContactMaterial = new CANNON.ContactMaterial(materialEsfera,materialPalanca,
+      { friction: 0.2, 
+        restitution: 100.0});
     var sphereWallContactMaterial = new CANNON.ContactMaterial(materialEsfera,wallMaterial,
       { friction:10, 
         restitution: 10});
@@ -222,7 +222,7 @@ function initPhysicWorld() {
     var geopalancaround = new THREE.BoxGeometry( 70, 8, 20)
     var geocubrepalancaround = new THREE.BoxGeometry( 85, 8, 20)
     var geocilindro = new THREE.CylinderBufferGeometry( 30, 30, 20, 32 );
-    var geocilindroBolardo = new THREE.CylinderBufferGeometry( 10, 10, 20, 20 );
+    var geocilindroBolardo = new THREE.CylinderBufferGeometry( 11, 11, 20, 20 );
     var georebotelargo = new THREE.BoxGeometry( 90, 8, 20,)
     var georebotecorto = new THREE.BoxGeometry(70, 8, 20)
     var geocilindrofondo = new THREE.CylinderBufferGeometry( 20, 20, 20, 32 );
@@ -603,7 +603,7 @@ function initPhysicWorld() {
     //Bolardos
     var distancia = 25
     var bolardoDerecha = new THREE.Mesh(geocilindroBolardo,materialNeptune)
-    bolardoDerecha.position.x = distancia
+    bolardoDerecha.position.x = distancia - 3
     bolardoDerecha.position.y = reboteCortoDer1.position.y
     bolardoDerecha.position.z += 10
     bolardoDerecha.rotation.x = Math.PI/2
@@ -611,7 +611,7 @@ function initPhysicWorld() {
     var aux = -Math.sin(-Math.PI * 0.25) * (-bolardoDerecha.position.y+300);
     var aux2 = Math.cos(-Math.PI * 0.25) * (-bolardoDerecha.position.y+300);
 
-    var bolardoShape = new CANNON.Cylinder(10, 10, 40, 20)
+    var bolardoShape = new CANNON.Cylinder(11, 1, 40, 20)
     var bolardoDerechaBody = new CANNON.Body({ mass: 0, material: materialEstrella });
     bolardoDerechaBody.addShape(bolardoShape)
     bolardoDerechaBody.position.set(bolardoDerecha.position.x,aux,-aux2);
@@ -621,7 +621,7 @@ function initPhysicWorld() {
 
 
     var bolardoIzquierda = new THREE.Mesh(geocilindroBolardo,materialNeptune)
-    bolardoIzquierda.position.x =  - distancia
+    bolardoIzquierda.position.x =  - distancia +3
     bolardoIzquierda.position.y = reboteCortoIzq1.position.y
     bolardoIzquierda.position.z += 10
     bolardoIzquierda.rotation.x = Math.PI/2
