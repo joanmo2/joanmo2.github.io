@@ -633,7 +633,7 @@ function initPhysicWorld() {
     //helper.addVisual(reboteCortoDer2Body)
 
     //Bolardos
-    var distancia = 25
+    var distancia = 23
     var bolardoDerecha = new THREE.Mesh(geocilindroBolardo,materialNeptune)
     bolardoDerecha.position.x = distancia - 3
     bolardoDerecha.position.y = reboteCortoDer1.position.y
