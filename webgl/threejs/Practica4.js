@@ -166,6 +166,7 @@ function setCameras(ar){
    //Base
    base = new THREE.Mesh(geocilindro,material);
    base.rotation.x = Math.PI * 0.5;
+   base.position.z +=10
 
    //Brazo
    pieDeBrazo = new THREE.Mesh(geocilindroGirado,material);
