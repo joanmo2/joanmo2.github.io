@@ -140,9 +140,6 @@ function initPhysicWorld() {
     world.addBody(ground)
 
     //helper.addVisual(ground,0xFFFFFF)
-
-
-
 }
 
  function initVisualWorld(){
@@ -173,16 +170,18 @@ function initPhysicWorld() {
 
     // Luces
 	  var luzAmbiente = new THREE.AmbientLight(0xFFFFFF, 0.4);
-    //scene.add( luzAmbiente );
+    scene.add( luzAmbiente );
     
-    var luzFocal = new THREE.SpotLight(0xFFFFFF,0.9);
+    var luzFocal = new THREE.SpotLight(0xFFFFFF,0.4);
 	  luzFocal.position.set( 1000,1000,1000 );
 	  luzFocal.target.position.set(0,0,0);
-	  luzFocal.angle = Math.PI/5;
-	  luzFocal.penumbra = 0.2;
+	  luzFocal.angle = Math.PI/8;
+    luzFocal.penumbra = 0.7;
+    luzFocal.shadow.mapSize.width = 1024;
+    luzFocal.shadow.mapSize.height = 1024;
     luzFocal.castShadow = true;
     luzFocal.shadow.camera.near = 0.1;
-    luzFocal.shadow.camera.far = 50000;
+    luzFocal.shadow.camera.far = 5000;
     luzFocal.shadow.camera.fov = 50000;
 	  scene.add(luzFocal);
 
@@ -241,8 +240,8 @@ function initPhysicWorld() {
     var aux = Math.sin(-Math.PI * 0.25) * 350;
     var aux2 = Math.cos(-Math.PI * 0.25) * 350;
     bola = new esfera(13,new CANNON.Vec3(1,aux2-25,aux +50),"sphereMaterial", matTierra)
-    bola.receiveShadow = true;
-    bola.castShadow = true;
+    bola.visual.receiveShadow = true;
+    bola.visual.castShadow = true;
     //helper.addVisual(bola.body)
     world.addBody(bola.body)
     scene.add(bola.visual)
@@ -253,11 +252,18 @@ function initPhysicWorld() {
     palancaIzq.position.y -= 30;
     palancaIzq.position.z += 10;
     palancaIzq.rotation.z -= rotacionPalanca;
+    palancaIzq.receiveShadow = true;
+    palancaIzq.castShadow = true;
+
+
     palancaDer = new THREE.Mesh(geopalancaround,materialHierro)
     palancaDer.position.x -= 30;
     palancaDer.position.y -= 30;
     palancaDer.position.z += 10;
     palancaDer.rotation.z += rotacionPalanca;
+    palancaDer.receiveShadow = true;
+    palancaDer.castShadow = true;
+
     
     //Ejes sobre los que pivotan las palancas
     ejePalancaDer = new THREE.Object3D();
@@ -271,6 +277,9 @@ function initPhysicWorld() {
     var estrellaCentral = new THREE.Mesh(geocilindro,materialLuna)
     estrellaCentral.rotation.x += Math.PI * 0.5;
     estrellaCentral.position.z += 10
+    estrellaCentral.receiveShadow = true;
+    estrellaCentral.castShadow = true;
+
 
     //Estrella FISICA
     var estrellaShape = new CANNON.Cylinder(30, 30, 80, 32)
@@ -326,6 +335,9 @@ function initPhysicWorld() {
     cubrePalancaIzq.position.y = -165
     cubrePalancaIzq.position.z += 10
     cubrePalancaIzq.rotation.z -= rotacionPalanca
+    cubrePalancaIzq.receiveShadow = true;
+    cubrePalancaIzq.castShadow = true;
+
     plano.add(cubrePalancaIzq)
 
     cubrePalancaDer = new THREE.Mesh(geocubrepalancaround,materialHierro)
@@ -333,6 +345,9 @@ function initPhysicWorld() {
     cubrePalancaDer.position.y = -165
     cubrePalancaDer.position.z += 10
     cubrePalancaDer.rotation.z += rotacionPalanca
+    cubrePalancaDer.receiveShadow = true;
+    cubrePalancaDer.castShadow = true;
+
     plano.add(cubrePalancaDer)
 
     //Cubre-palanca FISICO
@@ -372,6 +387,8 @@ function initPhysicWorld() {
     paredCubrePalancaIzq.position.y = -162 +75
     paredCubrePalancaIzq.position.z += 10
     paredCubrePalancaIzq.rotation.z = Math.PI/2
+    paredCubrePalancaIzq.receiveShadow = true;
+    paredCubrePalancaIzq.castShadow = true;
     plano.add(paredCubrePalancaIzq)
 
     var paredCubrePalancaDer = new THREE.Mesh(geoparedcubrepalanca,materialHierro)
@@ -379,6 +396,8 @@ function initPhysicWorld() {
     paredCubrePalancaDer.position.y = -162 + 75
     paredCubrePalancaDer.position.z += 10
     paredCubrePalancaDer.rotation.z = Math.PI/2
+    paredCubrePalancaDer.receiveShadow = true;
+    paredCubrePalancaDer.castShadow = true;
     plano.add(paredCubrePalancaDer)
 
     //PAREDES FÍSICAS
@@ -412,17 +431,14 @@ function initPhysicWorld() {
     //helper.addVisual( paredCubrePalancaIzqBody)
     //helper.addVisual( paredCubrePalancaDerBody)
 
-
-
-
-    
-
     //Rebotes de cerca de la palanca 
     var rebotePalancaIzq = new THREE.Mesh(georebotepalanca,materialOro)
     rebotePalancaIzq.position.x -= 70;
     rebotePalancaIzq.position.y -= 100;
     rebotePalancaIzq.position.z += 10;
     rebotePalancaIzq.rotation.z -= Math.PI/2.75
+    rebotePalancaIzq.receiveShadow = true;
+    rebotePalancaIzq.castShadow = true;
     plano.add(rebotePalancaIzq)
 
     
@@ -433,6 +449,8 @@ function initPhysicWorld() {
     rebotePalancaDer.position.y -= 100;
     rebotePalancaDer.position.z += 10;
     rebotePalancaDer.rotation.z += Math.PI/2.75;
+    rebotePalancaDer.receiveShadow = true;
+    rebotePalancaDer.castShadow = true;
     plano.add(rebotePalancaDer);
 
     //Rebote palanca físico
@@ -472,6 +490,9 @@ function initPhysicWorld() {
     reboteLargoIzq.position.y += 90;
     reboteLargoIzq.position.z += 10;
     reboteLargoIzq.rotation.z -= Math.PI * 0.25;
+    reboteLargoIzq.receiveShadow = true;
+    reboteLargoIzq.castShadow = true;
+
 
     var aux = Math.sin(-Math.PI * 0.25) * reboteLargoIzq.position.y;
     var aux2 = Math.cos(-Math.PI * 0.25) * reboteLargoIzq.position.y;
@@ -496,6 +517,9 @@ function initPhysicWorld() {
     reboteLargoDer.position.y += 90;
     reboteLargoDer.position.z += 10;
     reboteLargoDer.rotation.z += Math.PI * 0.25;
+    reboteLargoDer.receiveShadow = true;
+    reboteLargoDer.castShadow = true;
+
 
     reboteLargoDerBody = new CANNON.Body({ mass: 0, material: materialEstrella })
     reboteLargoDerBody.addShape(reboteLargoShape)
@@ -515,6 +539,8 @@ function initPhysicWorld() {
     reboteCortoIzq1.position.y += 150;
     reboteCortoIzq1.position.z += 10;
     reboteCortoIzq1.rotation.z += Math.PI * 0.25;
+    reboteCortoIzq1.receiveShadow = true;
+    reboteCortoIzq1.castShadow = true;
 
     var aux = Math.sin(-Math.PI * 0.25) * reboteCortoIzq1.position.y;
     var aux2 = Math.cos(-Math.PI * 0.25) * reboteCortoIzq1.position.y;
@@ -539,6 +565,8 @@ function initPhysicWorld() {
     reboteCortoIzq2.position.y += 200;
     reboteCortoIzq2.position.z += 10;
     reboteCortoIzq2.rotation.z += Math.PI * 0.25;
+    reboteCortoIzq2.receiveShadow = true;
+    reboteCortoIzq2.castShadow = true;
 
     var aux = Math.sin(-Math.PI * 0.25) * reboteCortoIzq2.position.y;
     var aux2 = Math.cos(-Math.PI * 0.25) * reboteCortoIzq2.position.y;
@@ -561,6 +589,8 @@ function initPhysicWorld() {
     reboteCortoDer1.position.y += 150;
     reboteCortoDer1.position.z += 10;
     reboteCortoDer1.rotation.z -= Math.PI * 0.25;
+    reboteCortoDer1.receiveShadow = true;
+    reboteCortoDer1.castShadow = true;
 
     var aux = Math.sin(-Math.PI * 0.25) * reboteCortoDer1.position.y;
     var aux2 = Math.cos(-Math.PI * 0.25) * reboteCortoDer1.position.y;
@@ -583,6 +613,8 @@ function initPhysicWorld() {
     reboteCortoDer2.position.y += 200;
     reboteCortoDer2.position.z += 10;
     reboteCortoDer2.rotation.z -= Math.PI * 0.25;
+    reboteCortoDer2.receiveShadow = true;
+    reboteCortoDer2.castShadow = true;
 
     var aux = Math.sin(-Math.PI * 0.25) * reboteCortoDer2.position.y;
     var aux2 = Math.cos(-Math.PI * 0.25) * reboteCortoDer2.position.y;
@@ -607,6 +639,8 @@ function initPhysicWorld() {
     bolardoDerecha.position.y = reboteCortoDer1.position.y
     bolardoDerecha.position.z += 10
     bolardoDerecha.rotation.x = Math.PI/2
+    bolardoDerecha.receiveShadow = true;
+    bolardoDerecha.castShadow = true;
 
     var aux = -Math.sin(-Math.PI * 0.25) * (-bolardoDerecha.position.y+300);
     var aux2 = Math.cos(-Math.PI * 0.25) * (-bolardoDerecha.position.y+300);
@@ -625,6 +659,8 @@ function initPhysicWorld() {
     bolardoIzquierda.position.y = reboteCortoIzq1.position.y
     bolardoIzquierda.position.z += 10
     bolardoIzquierda.rotation.x = Math.PI/2
+    bolardoIzquierda.receiveShadow = true;
+    bolardoIzquierda.castShadow = true;
 
     var bolardoIzqBody = new CANNON.Body({ mass: 0, material: materialEstrella });
     bolardoIzqBody.addShape(bolardoShape)
@@ -640,6 +676,8 @@ function initPhysicWorld() {
     bolardoArriba.position.y = bolardoDerecha.position.y - distancia
     bolardoArriba.position.z += 10
     bolardoArriba.rotation.x = Math.PI/2
+    bolardoArriba.receiveShadow = true;
+    bolardoArriba.castShadow = true;
 
     var bolardoArribaBody = new CANNON.Body({ mass: 0, material: materialEstrella });
     bolardoArribaBody.addShape(bolardoShape)
@@ -652,6 +690,8 @@ function initPhysicWorld() {
     bolardoAbajo.position.y = bolardoDerecha.position.y + distancia
     bolardoAbajo.position.z += 10
     bolardoAbajo.rotation.x = Math.PI/2
+    bolardoAbajo.receiveShadow = true;
+    bolardoAbajo.castShadow = true;
 
     var aux = -Math.sin(-Math.PI * 0.25) * (-bolardoDerecha.position.y+300-distancia);
     var aux2 = Math.cos(-Math.PI * 0.25) * (-bolardoDerecha.position.y+300-distancia);
@@ -669,6 +709,8 @@ function initPhysicWorld() {
     bolardoLateralDerecha.position.y = reboteCortoDer1.position.y
     bolardoLateralDerecha.position.z += 10
     bolardoLateralDerecha.rotation.x = Math.PI/2
+    bolardoLateralDerecha.receiveShadow = true;
+    bolardoLateralDerecha.castShadow = true;
 
     var aux = -Math.sin(-Math.PI * 0.25) * (-bolardoDerecha.position.y+300);
     var aux2 = Math.cos(-Math.PI * 0.25) * (-bolardoDerecha.position.y+300);
@@ -686,6 +728,8 @@ function initPhysicWorld() {
     bolardoLateralIzquierda.position.y = reboteCortoIzq1.position.y
     bolardoLateralIzquierda.position.z += 10
     bolardoLateralIzquierda.rotation.x = Math.PI/2
+    bolardoLateralIzquierda.receiveShadow = true;
+    bolardoLateralIzquierda.castShadow = true;
 
     var bolardoLateralIzqBody = new CANNON.Body({ mass: 0, material: materialEstrella });
     bolardoLateralIzqBody.addShape(bolardoShape)
@@ -699,6 +743,9 @@ function initPhysicWorld() {
     estrellaFondo.position.y = bolardoArriba.position.y + 100
     estrellaFondo.rotation.x += Math.PI * 0.5;
     estrellaFondo.position.z += 10
+    estrellaFondo.receiveShadow = true;
+    estrellaFondo.castShadow = true;
+
 
     var aux = -Math.sin(-Math.PI * 0.25) * (-bolardoArriba.position.y + 350);
     var aux2 = Math.cos(-Math.PI * 0.25) * (-bolardoArriba.position.y + 350);
@@ -727,17 +774,24 @@ function initPhysicWorld() {
    topePista.rotation.x = Math.PI/2;
    topePista.rotation.z -=Math.PI/2
    topePista.position.y += 400
+   topePista.receiveShadow = true;
+   topePista.castShadow = true;
+
  
    var paredIzq = new THREE.Mesh(geopared,materialWall)
    paredIzq.position.x = -180
    paredIzq.position.y = 75
    paredIzq.rotation.y = Math.PI/2
+   paredIzq.receiveShadow = true;
+   paredIzq.castShadow = true;
+
 
    var paredDer = new THREE.Mesh(geopared,materialWall)
    paredDer.position.x = 180
    paredDer.position.y = 75
    paredDer.rotation.y -= Math.PI/2
-   //plano.add(paredDer)
+   paredDer.receiveShadow = true;
+   paredDer.castShadow = true;
 
    var paredShape = new CANNON.Box(new CANNON.Vec3(700, 2, 500))
 
