@@ -328,9 +328,6 @@ function setCameras(ar){
    pinzasRobot.add(pinzaDer)
    cabezaAntebrazo.add(pinzasRobot)
 
-
-
-
    // Habitacion
 	var shader = THREE.ShaderLib.cube;
 	shader.uniforms.tCube.value = mapaEntorno;
@@ -352,19 +349,15 @@ function setCameras(ar){
    keyboard.domElement.addEventListener('keydown', function(event){
        if( keyboard.pressed('up')){
         base.position.x -= 2;
-        planta.position.x -=2;
        }	
        if( keyboard.pressed('down')){
         base.position.x += 2;
-        planta.position.x +=2;
        }	
        if( keyboard.pressed('left')){
         base.position.y -= 2;
-        planta.position.z +=2;
        }	
        if( keyboard.pressed('right')){
         base.position.y += 2;
-        planta.position.z -=2;
        }	
    })
 

@@ -69,14 +69,10 @@ function setCameras(ar){
     var ar = window.innerWidth / innerHeight;
     setCameras(ar)
 
-
-
     //Controlador de camara
     cameraControler = new THREE.OrbitControls(camera, renderer.domElement)
     cameraControler.target.set(0,0,0)
     cameraControler.noKeys = true;
-
-    //teclado
 
  }
 
@@ -249,36 +245,21 @@ function setCameras(ar){
    pinzasRobot.add(pinzaDer)
    cabezaAntebrazo.add(pinzasRobot)
 
-
-
-
-   // pieDeBrazo.add( new THREE.AxisHelper(60));
-   // nexo.add(new THREE.AxisHelper(30))
-   //scene.add( new THREE.AxisHelper(500));
-   //base.add(new THREE.AxisHelper(100))
-   //cabezaAntebrazo.add(new THREE.AxisHelper(100))
-   //nexo.add(esfera);
-   //antebrazoRobot.add(new THREE.AxisHelper(100))
-
    keyboard = new THREEx.KeyboardState(renderer.domElement);  
    renderer.domElement.setAttribute("tabIndex", "0");
    renderer.domElement.focus();  
    keyboard.domElement.addEventListener('keydown', function(event){
        if( keyboard.pressed('up')){
         base.position.x -= 2;
-        planta.position.x -=2;
        }	
        if( keyboard.pressed('down')){
         base.position.x += 2;
-        planta.position.x +=2;
        }	
        if( keyboard.pressed('left')){
         base.position.y -= 2;
-        planta.position.z +=2;
        }	
        if( keyboard.pressed('right')){
         base.position.y += 2;
-        planta.position.z -=2;
        }	
    })
 
